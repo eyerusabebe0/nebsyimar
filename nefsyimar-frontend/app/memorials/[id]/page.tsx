@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 
 import MemorialHeader from '@/components/MemorialHeader'
@@ -23,25 +24,34 @@ function resolveMemorialImage(path?: string | null) {
 }
 
 async function fetchMemorial(identifier: string) {
-  const res = await fetch(`${API_BASE_URL}/memorials/${encodeURIComponent(identifier)}`, {
-    cache: 'no-store',
-  })
+  try {
+    const cookieHeader = headers().get('cookie') || undefined
+    const res = await fetch(`${API_BASE_URL}/memorials/${encodeURIComponent(identifier)}`, {
+      cache: 'no-store',
+      headers: cookieHeader ? { cookie: cookieHeader } : undefined,
+    })
 
-  if (res.status === 404) {
+    if (res.status === 404) {
+      return null
+    }
+
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => '')
+      console.error('Failed to load memorial', res.status, errorText)
+      return null
+    }
+
+    const json = await res.json()
+
+    if (!json.success || !json.data?.memorial) {
+      return null
+    }
+
+    return json.data.memorial as any
+  } catch (error) {
+    console.error('Error fetching memorial:', error)
     return null
   }
-
-  if (!res.ok) {
-    throw new Error('Failed to load memorial')
-  }
-
-  const json = await res.json()
-
-  if (!json.success || !json.data?.memorial) {
-    return null
-  }
-
-  return json.data.memorial as any
 }
 
 function mapApiMemorialToProps(apiMemorial: any, currentUserId?: string) {
@@ -68,7 +78,9 @@ function mapApiMemorialToProps(apiMemorial: any, currentUserId?: string) {
       : [],
     creatorId: apiMemorial.user_id as string,
     isOwner: currentUserId === apiMemorial.user_id,
-    headstoneDesign: apiMemorial.memorial_settings?.headstone_design || 'grave_stone',
+    headstoneDesign: ['stone_1','stone_2','stone_3','stone_4','stone_6','stone_7','stone_8','stone_9'].includes(apiMemorial.memorial_settings?.headstone_design)
+      ? apiMemorial.memorial_settings.headstone_design
+      : 'stone_2',
     memorialSettings: apiMemorial.memorial_settings || {
       allow_comments: true,
       comment_moderation: 'none',

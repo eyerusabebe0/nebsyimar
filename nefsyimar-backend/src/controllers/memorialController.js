@@ -4,8 +4,21 @@ const { sequelize } = require('../config/database');
 const Op = sequelize.Sequelize.Op;
 const { uploadFiles } = require('../utils/fileUpload');
 
-const MEMORIAL_CREATION_FEE = 10.00; // ETB
-const ALLOWED_HEADSTONE_DESIGNS = new Set(['grave_stone', 'grave_stone_2', 'grave_stone_3']);
+const MEMORIAL_CREATION_FEE = 10.00; // ETB default fee when payment is enabled for non-premium stones
+const HEADSTONE_ADDITIONAL_FEES = {
+  stone_9: 300.00,
+};
+const ALLOWED_HEADSTONE_DESIGNS = new Set([
+  'stone_1',
+  'stone_2',
+  'stone_3',
+  'stone_4',
+  'stone_5',
+  'stone_6',
+  'stone_7',
+  'stone_8',
+  'stone_9'
+]);
 
 // @desc    Get all public memorials
 // @route   GET /api/v1/memorials
@@ -249,7 +262,8 @@ const createMemorial = asyncHandler(async (req, res) => {
     visibility = 'PUBLIC',
     cultural_template = 'MODERN',
     memorial_url,
-    headstone_design
+    headstone_design,
+    skip_payment = false,
   } = req.body;
 
   if (headstone_design && !ALLOWED_HEADSTONE_DESIGNS.has(String(headstone_design))) {
@@ -266,24 +280,38 @@ const createMemorial = asyncHandler(async (req, res) => {
     });
   }
 
-  // Check wallet balance
-  const wallet = await Wallet.findOne({
-    where: { user_id: req.user.user_id }
-  });
+  const skipPayment = String(skip_payment).toLowerCase() === 'true';
+  const requestedFee = HEADSTONE_ADDITIONAL_FEES[String(headstone_design)] || 0.00;
+  let wallet = null;
+  let walletTransaction = null;
 
-  if (!wallet) {
-    return res.status(404).json({
+  if (requestedFee > 0 && skipPayment) {
+    return res.status(400).json({
       success: false,
-      message: 'Wallet not found'
+      message: 'Payment is required to use the selected headstone design.'
     });
   }
 
-  if (wallet.is_frozen) {
-    throw new WalletFrozenError();
-  }
+  if (!skipPayment) {
+    // Check wallet balance
+    wallet = await Wallet.findOne({
+      where: { user_id: req.user.user_id }
+    });
 
-  if (!wallet.hasBalance(MEMORIAL_CREATION_FEE)) {
-    throw new InsufficientFundsError(`Insufficient balance. Memorial creation requires ${MEMORIAL_CREATION_FEE} ETB.`);
+    if (!wallet) {
+      return res.status(404).json({
+        success: false,
+        message: 'Wallet not found'
+      });
+    }
+
+    if (wallet.is_frozen) {
+      throw new WalletFrozenError();
+    }
+
+    if (!wallet.hasBalance(requestedFee)) {
+      throw new InsufficientFundsError(`Insufficient balance. Memorial creation requires ${requestedFee} ETB.`);
+    }
   }
 
   try {
@@ -312,7 +340,8 @@ const createMemorial = asyncHandler(async (req, res) => {
         visibility,
         cultural_template,
         memorial_url,
-        paid_status: false // Will be set to true after payment
+        paid_status: true,
+      payment_txn_id: null,
       }, { transaction });
 
       if (headstone_design) {
@@ -323,36 +352,37 @@ const createMemorial = asyncHandler(async (req, res) => {
         await memorial.save({ transaction });
       }
 
-      const balanceBefore = parseFloat(wallet.balance);
-      const balanceAfter = balanceBefore - MEMORIAL_CREATION_FEE;
+      if (!skipPayment) {
+        const balanceBefore = parseFloat(wallet.balance);
+        const balanceAfter = balanceBefore - requestedFee;
 
-      // Create wallet transaction for memorial creation fee
-      const walletTransaction = await WalletTransaction.create({
-        wallet_id: wallet.wallet_id,
-        user_id: req.user.user_id,
-        amount: -MEMORIAL_CREATION_FEE,
-        type: 'MEMORIAL_CREATION',
-        status: 'COMPLETED',
-        description: `Memorial creation fee for "${deceased_name}"`,
-        reference_id: memorial.memorial_id,
-        reference_type: 'MEMORIAL',
-        balance_before: balanceBefore,
-        balance_after: balanceAfter,
-        fee_amount: 0,
-        net_amount: -MEMORIAL_CREATION_FEE,
-        processed_at: new Date()
-      }, { transaction });
+        // Create wallet transaction for memorial creation fee
+        walletTransaction = await WalletTransaction.create({
+          wallet_id: wallet.wallet_id,
+          user_id: req.user.user_id,
+          amount: -requestedFee,
+          type: 'MEMORIAL_CREATION',
+          status: 'COMPLETED',
+          description: `Memorial creation fee for "${deceased_name}"`,
+          reference_id: memorial.memorial_id,
+          reference_type: 'MEMORIAL',
+          balance_before: balanceBefore,
+          balance_after: balanceAfter,
+          fee_amount: 0,
+          net_amount: -requestedFee,
+          processed_at: new Date()
+        }, { transaction });
 
-      // Debit wallet inside the same transaction
-      wallet.balance = balanceAfter;
-      wallet.total_spent = parseFloat(wallet.total_spent || 0) + MEMORIAL_CREATION_FEE;
-      wallet.last_transaction_at = new Date();
-      await wallet.save({ transaction });
+        // Debit wallet inside the same transaction
+        wallet.balance = balanceAfter;
+        wallet.total_spent = parseFloat(wallet.total_spent || 0) + requestedFee;
+        wallet.last_transaction_at = new Date();
+        await wallet.save({ transaction });
 
-      // Mark memorial as paid inside the same transaction
-      memorial.paid_status = true;
-      memorial.payment_txn_id = walletTransaction.txn_id;
-      await memorial.save({ transaction });
+        // Mark memorial as paid inside the same transaction
+        memorial.payment_txn_id = walletTransaction.txn_id;
+        await memorial.save({ transaction });
+      }
 
       // Fetch the complete memorial with creator info
       const completeMemorial = await Memorial.findByPk(memorial.memorial_id, {
@@ -447,8 +477,36 @@ const updateMemorial = asyncHandler(async (req, res) => {
   if (uploadedFiles.cover_image) {
     updateData.cover_image = uploadedFiles.cover_image[0];
   }
+
+  const requestedGalleryImages = Array.isArray(req.body.gallery_images)
+    ? req.body.gallery_images.filter((img) => typeof img === 'string')
+    : null;
+  const deletedImages = Array.isArray(req.body.deleted_images)
+    ? req.body.deleted_images.map((item) => String(item))
+    : [];
+
+  const existingGalleryImages = Array.isArray(memorial.gallery_images)
+    ? [...memorial.gallery_images]
+    : [];
+
+  let galleryImagesToSave = existingGalleryImages;
+
+  if (requestedGalleryImages !== null) {
+    galleryImagesToSave = requestedGalleryImages;
+  } else if (deletedImages.length > 0) {
+    galleryImagesToSave = galleryImagesToSave.filter((img, idx) => {
+      const normalizedImg = String(img);
+      const normalizedIdx = String(idx);
+      return !deletedImages.includes(normalizedImg) && !deletedImages.includes(normalizedIdx);
+    });
+  }
+
   if (uploadedFiles.gallery_images) {
-    updateData.gallery_images = [...memorial.gallery_images, ...uploadedFiles.gallery_images];
+    galleryImagesToSave = [...galleryImagesToSave, ...uploadedFiles.gallery_images];
+  }
+
+  if (requestedGalleryImages !== null || deletedImages.length > 0 || uploadedFiles.gallery_images) {
+    updateData.gallery_images = galleryImagesToSave;
   }
 
   await memorial.update(updateData);

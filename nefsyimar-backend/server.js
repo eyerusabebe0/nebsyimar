@@ -11,10 +11,10 @@ const initApp = async () => {
     await sequelize.authenticate();
     console.log('✅ Database connection established successfully.');
 
-    if (process.env.NODE_ENV === 'development') {
-      await sequelize.sync({ alter: true });
-      console.log('✅ Database models synchronized.');
-    }
+    // ⚡ FORCED SYNC: Removed the production environment guard so tables auto-create now
+    console.log('⏳ Synchronizing database tables...');
+    await sequelize.sync({ alter: true });
+    console.log('✅ Database models synchronized successfully.');
 
     console.log(`🚀 Nefsyimar Backend app initialized (env=${process.env.NODE_ENV}).`);
   } catch (error) {

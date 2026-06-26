@@ -160,20 +160,20 @@ export default function ShopItems({ shopId, onBackToShops }: ShopItemsProps) {
 
       {/* Items Grid */}
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-white">Available Items</h2>
-          <span className="text-accent-400">{shop.items.length} items</span>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+          <h2 className="text-xl sm:text-2xl font-semibold text-white">Available Items</h2>
+          <span className="text-accent-400 text-sm sm:text-base">{shop.items.length} items</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {shop.items.map((item: ShopItem) => (
             <div
               key={item.id}
               onClick={() => router.push(`/marketplace/products/${item.id}`)}
-              className="memorial-card rounded-xl overflow-hidden hover:transform hover:scale-105 transition-all duration-300 group cursor-pointer"
+              className="memorial-card rounded-xl overflow-hidden hover:scale-105 transition-all duration-300 group cursor-pointer"
             >
               {/* Item Image */}
-              <div className="relative h-48 bg-gradient-to-br from-accent-700 to-accent-800">
+              <div className="relative h-44 sm:h-48 bg-gradient-to-br from-accent-700 to-accent-800">
                 <img 
                   src={item.image} 
                   alt={item.name}
@@ -218,8 +218,8 @@ export default function ShopItems({ shopId, onBackToShops }: ShopItemsProps) {
               </div>
 
               {/* Item Info */}
-              <div className="p-4">
-                <h3 className="text-white font-medium mb-2 group-hover:text-accent-400 transition-colors">
+              <div className="p-4 sm:p-5">
+                <h3 className="text-white text-base sm:text-lg font-medium mb-2 group-hover:text-accent-400 transition-colors">
                   {item.name}
                 </h3>
                 
@@ -228,7 +228,7 @@ export default function ShopItems({ shopId, onBackToShops }: ShopItemsProps) {
                 </p>
 
                 {/* Rating */}
-                <div className="flex items-center space-x-1 mb-3">
+                <div className="flex flex-wrap items-center gap-2 mb-3 text-sm">
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
                       <Star

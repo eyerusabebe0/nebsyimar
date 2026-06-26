@@ -19,7 +19,7 @@ export default function ProductCategories() {
   return (
     <div className="mb-8">
       <h2 className="text-xl font-semibold text-white mb-4">Shop by Category</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
         {categories.map((category) => (
           <button
             key={category.id}

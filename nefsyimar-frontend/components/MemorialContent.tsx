@@ -3,7 +3,6 @@
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { Calendar, MapPin, Users, Clock, ChevronDown, ChevronUp, Heart, ChevronLeft, ChevronRight, Star } from 'lucide-react'
-import HeadstoneMemorial from './HeadstoneMemorial'
 import { useAuth } from '@/contexts/AuthContext'
 import api from '@/lib/api'
 import { toast } from 'react-hot-toast'
@@ -176,6 +175,7 @@ export default function MemorialContent({ memorial, initialRecentGifts }: Memori
   const [giftPage, setGiftPage] = useState(0)
   const [tributePage, setTributePage] = useState(0)
   const [showAllTributes, setShowAllTributes] = useState(false)
+  const [showAllPhotos, setShowAllPhotos] = useState(false)
 
   useEffect(() => {
     const loadGifts = async () => {
@@ -372,7 +372,40 @@ export default function MemorialContent({ memorial, initialRecentGifts }: Memori
     startTributeIndex,
     startTributeIndex + TRIBUTES_PER_PAGE
   )
+const CEMETERY_BG_STYLE: React.CSSProperties = {
+  background:
+    'radial-gradient(circle at 50% 14%, rgba(238,192,192,0.08), transparent 100%), ' +
+    'linear-gradient(to top, rgba(15,15,15,0.98), rgba(23,30,22,0.62) 38%, rgba(53,124,59,0.12) 100%), ' +
+    'url("/cemetery_bg.png") center bottom / cover no-repeat',
+  boxShadow: 'inset 0 0 42px rgba(0,0,0,0.88)',
+}
 
+const GRASS_LAYERS = [
+  { h: 'h-16', z: 'z-20', size: '120px', brightness: '0.32', blur: '0.5px', ty: '4px' },
+  { h: 'h-14', z: 'z-25', size: '135px', brightness: '0.48', blur: '0',     ty: '2px' },
+  { h: 'h-11', z: 'z-30', size: '150px', brightness: '0.62', blur: '0',     ty: '0'   },
+]
+
+function GrassOverlay() {
+  return (
+    <>
+      {GRASS_LAYERS.map((l, i) => (
+        <div
+          key={i}
+          className={`absolute bottom-0 left-0 right-0 ${l.h} pointer-events-none ${l.z}`}
+          style={{
+            backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/1/1a/Grass_01.png")',
+            backgroundRepeat: 'repeat-x',
+            backgroundSize: `${l.size} auto`,
+            backgroundPosition: 'bottom center',
+            filter: `brightness(${l.brightness}) contrast(1.1) saturate(0.8)${l.blur ? ` blur(${l.blur})` : ''}`,
+            transform: `translateY(${l.ty})`,
+          }}
+        />
+      ))}
+    </>
+  )
+}
   return (
     <div className="space-y-6">
       {/* Life Story Toggle */}
@@ -408,46 +441,38 @@ export default function MemorialContent({ memorial, initialRecentGifts }: Memori
           <span>Send Tribute Gift</span>
         </h3>
         
-        <div className="grid grid-cols-3 gap-2 md:gap-4">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-3 md:gap-4">
           {visibleGifts.map((gift) => (
             <button
               key={gift.id}
               onClick={() => handleGiftSelect(gift.id)}
-              className={`relative w-full p-2 md:p-6 rounded-lg md:rounded-xl transition-all duration-200 text-center group ${
-                selectedGift === gift.id
-                  ? 'bg-accent-500/20 border-2 border-accent-500 scale-105'
-                  : 'bg-primary-800/30 border-2 border-white/20/50 hover:border-accent-600 hover:bg-white/10/50 hover:scale-105'
+              className={`relative flex flex-col overflow-hidden rounded-lg sm:rounded-2xl transition-all duration-300 bg-gradient-to-b from-primary-900/80 to-primary-950/80 border border-white/6 group ${
+                selectedGift === gift.id ? 'ring-2 ring-accent-400' : 'hover:-translate-y-1 hover:shadow-2xl'
               }`}
             >
-              {/* Gift Icon */}
-              <div className="mb-1 md:mb-3 group-hover:scale-110 transition-transform duration-200 flex items-center justify-center">
-                <div className="flex-shrink-0 rounded-xl flex items-center justify-center">
-                  <Image
-                    src={gift.image}
-                    alt={gift.name}
-                    width={80}
-                    height={80}
-                    className="mx-auto h-12 w-12 md:h-20 md:w-20 object-contain drop-shadow-md mix-blend-screen"
-                  />
+              <div className="relative aspect-square bg-primary-900/40 overflow-hidden">
+                <img
+                  src={gift.image}
+                  alt={gift.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  onError={(e) => { e.currentTarget.src = '/tribute-rose.png' }}
+                />
+                <div className="absolute top-1 left-1 sm:top-3 sm:left-3 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-primary-900/80 backdrop-blur border border-accent-400/30 text-[7px] sm:text-[11px] uppercase tracking-wider text-accent-200 font-semibold hidden sm:flex items-center gap-1.5">
+                  <span className="text-rose-400">🕊️</span>
+                  Tribute
                 </div>
               </div>
-              
-              {/* Gift Name */}
-              <div className="text-white font-medium text-[10px] md:text-sm mb-1 md:mb-2 line-clamp-2 leading-tight">
-                {gift.name}
+
+              <div className="p-1 sm:p-3 flex-1">
+                <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+                  <span className="text-white font-bold text-[11px] sm:text-base leading-tight">{gift.price} <span className="text-[8px] sm:text-xs text-accent-400">ETB</span></span>
+                </div>
+                <h4 className="text-[9px] sm:text-sm font-semibold text-accent-100 line-clamp-1 sm:line-clamp-2 leading-tight mb-0 sm:mb-1">{gift.name}</h4>
+                <p className="hidden sm:block text-xs text-accent-400 line-clamp-2">{gift.description}</p>
               </div>
-              
-              {/* Price with Coin Icon */}
-              <div className="flex items-center justify-center space-x-0.5 md:space-x-1 bg-accent-600/50 rounded-full px-1.5 py-0.5 md:px-2 md:py-1">
-                <span className="text-yellow-400 text-[10px] md:text-sm">🪙</span>
-                <span className="text-yellow-300 font-bold text-[10px] md:text-sm">{gift.price}</span>
-              </div>
-              
-              {/* Selection Indicator */}
+
               {selectedGift === gift.id && (
-                <div className="absolute top-1 right-1 md:top-2 md:right-2 w-4 h-4 md:w-6 md:h-6 bg-accent-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-[8px] md:text-xs">✓</span>
-                </div>
+                <div className="absolute top-1 right-1 sm:top-3 sm:right-3 flex h-3.5 w-3.5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-accent-500 text-[7px] sm:text-[10px] text-white font-bold">✓</div>
               )}
             </button>
           ))}
@@ -696,57 +721,89 @@ export default function MemorialContent({ memorial, initialRecentGifts }: Memori
         </div>
       </div>
 
-      {/* Memorial Headstone */}
-      <HeadstoneMemorial memorial={{...memorial, totalTributes: 0, totalAmount: 0}} />
-
       {/* Photo Gallery */}
       <div className="memorial-card rounded-xl p-6">
-        <h2 className="text-xl font-semibold text-white mb-4">Photo Memories</h2>
-        {(() => {
-          const images: string[] = []
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <div>
+            <h2 className="text-xl font-semibold text-white">Photo Memories</h2>
+            <p className="text-accent-400 text-sm mt-1">
+              Cherished images from the memorial collection.
+            </p>
+          </div>
+        </div>
 
-          // Only show gallery images that were explicitly uploaded
+        {(() => {
+          const images: string[] = [];
           if (Array.isArray(memorial.galleryImages)) {
             memorial.galleryImages.forEach((img) => {
-              const url = resolveMemorialImageUrl(img)
-              if (url) images.push(url)
-            })
+              const url = resolveMemorialImageUrl(img);
+              if (url) images.push(url);
+            });
           }
 
           if (!images.length) {
             return (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map((index) => (
-                  <div
-                    key={index}
-                    className="aspect-[4/3] bg-gradient-to-br from-accent-700 to-accent-800 rounded-lg flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer"
-                  >
-                    <Users className="w-12 h-12 text-accent-400" />
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
+                {[1, 2, 3].map((index) => (
+                  <div key={index} className="aspect-[4/3] rounded-2xl sm:rounded-3xl border border-white/10 bg-gradient-to-br from-primary-950 to-slate-950 flex items-center justify-center overflow-hidden">
+                    <Users className="w-8 h-8 sm:w-12 sm:h-12 text-accent-500" />
                   </div>
                 ))}
               </div>
-            )
+            );
           }
 
+          // Show exactly 2 photos on every screen size until "See More" is clicked
+          const displayItems = showAllPhotos ? images : images.slice(0, 2);
+
           return (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              {images.map((src, index) => (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+              {displayItems.map((src, index) => (
                 <div
-                  key={index}
-                  className="relative aspect-[4/3] bg-gradient-to-br from-accent-700 to-accent-800 rounded-lg overflow-hidden hover:scale-105 transition-transform duration-200 cursor-pointer"
+                  key={`gallery-${index}`}
+                  className="relative aspect-[4/3] overflow-hidden rounded-2xl sm:rounded-[28px] bg-gradient-to-br from-primary-950 via-slate-950 to-slate-900 shadow-[0_15px_40px_rgba(2,6,23,0.6)] sm:shadow-[0_30px_90px_rgba(2,6,23,0.75)] transition-transform duration-300 hover:-translate-y-1"
                 >
                   <Image
                     src={src}
                     alt={`Memorial photo ${index + 1}`}
                     fill
-                    className="object-cover"
+                    quality={90}
+                    className="object-cover rounded-2xl sm:rounded-[28px]"
                   />
                 </div>
               ))}
+
+              {/* See More tile */}
+              {!showAllPhotos && images.length > 2 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllPhotos(true)}
+                  className="group relative flex items-center justify-center aspect-[4/3] overflow-hidden rounded-2xl sm:rounded-[28px] border border-accent-500/20 bg-primary-950/80 transition-all duration-300 hover:border-accent-400/40 hover:bg-accent-500/10"
+                >
+                  <span className="flex flex-col items-center gap-1 sm:gap-2 text-xs sm:text-sm font-semibold text-white">
+                    <span>See More...</span>
+                    <span className="text-[10px] sm:text-xs text-accent-300">{images.length - 2} more photos</span>
+                  </span>
+                </button>
+              )}
+
+              {/* See Less tile, shown after expanding */}
+              {showAllPhotos && images.length > 2 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllPhotos(false)}
+                  className="group relative flex items-center justify-center aspect-[4/3] overflow-hidden rounded-2xl sm:rounded-[28px] border border-accent-500/20 bg-primary-950/80 transition-all duration-300 hover:border-accent-400/40 hover:bg-accent-500/10"
+                >
+                  <span className="flex flex-col items-center gap-1 sm:gap-2 text-xs sm:text-sm font-semibold text-white">
+                    <span>Show Less</span>
+                  </span>
+                </button>
+              )}
             </div>
-          )
+          );
         })()}
       </div>
+
     </div>
   )
 }

@@ -260,7 +260,7 @@ export default function Step2LifeStory() {
           Select the words that best capture their personality. These will help visitors understand who they were.
         </p>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {personalityTraits.map((trait) => {
             const isSelected = lifeStory.personalityTraits?.includes(trait)
             return (

@@ -263,7 +263,7 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
         {related.length > 0 && (
           <div className="mt-4">
             <h2 className="text-lg font-semibold text-white mb-3">More from this vendor</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {related.map((rp) => (
                 <button
                   key={rp.id}
@@ -290,7 +290,7 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
         {featured.length > 0 && (
           <div className="mt-8">
             <h2 className="text-lg font-semibold text-white mb-3">Featured marketplace picks</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {featured.map((fp) => (
                 <button
                   key={fp.id}

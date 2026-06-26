@@ -232,7 +232,7 @@ export default function MemorialTimeline({ events, className = '' }: MemorialTim
       {/* Timeline Legend */}
       <div className="mt-8 pt-6 border-t border-white/10">
         <h4 className="text-accent-200 font-medium mb-3 text-sm">Timeline Legend</h4>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
           {Object.entries(eventTypeConfig).map(([type, config]) => {
             const Icon = config.icon
             return (

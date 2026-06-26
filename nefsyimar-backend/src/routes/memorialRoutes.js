@@ -26,7 +26,6 @@ const {
   authenticate,
   optionalAuth,
   checkMemorialOwnership,
-  checkWalletStatus,
   userRateLimit
 } = require('../middleware/authMiddleware');
 const { validateMemorialCreation, validateUUIDParam, validatePagination, validateSearch } = require('../middleware/validationMiddleware');
@@ -45,7 +44,6 @@ router.use(authenticate);
 // Memorial management (with image uploads)
 router.post('/',
   userRateLimit(10, 60 * 60 * 1000),
-  checkWalletStatus,
   uploadMiddleware.memorial,
   validateMemorialCreation,
   createMemorial

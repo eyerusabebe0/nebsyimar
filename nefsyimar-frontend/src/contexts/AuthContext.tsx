@@ -97,6 +97,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Store JWT token if provided
         if (response.data.data.token) {
           localStorage.setItem('nefsyimar_token', response.data.data.token);
+        } else {
+          // No token returned: attempt to refresh auth status (cookie/session based auth)
+          try {
+            const statusResp = await authApi.getAuthStatus();
+            if (statusResp.data?.success && statusResp.data?.authenticated && statusResp.data?.data) {
+              setUser(statusResp.data.data.user);
+              setWallet(statusResp.data.data.wallet || statusResp.data.data.user.wallet || null);
+            }
+          } catch (e) {
+            // ignore
+          }
         }
         
         toast.success('Welcome back! 🕊️');
@@ -130,6 +141,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (response.data.data.token) {
           localStorage.setItem('nefsyimar_token', response.data.data.token);
           console.log('🔑 JWT token stored');
+        } else {
+          try {
+            const statusResp = await authApi.getAuthStatus();
+            if (statusResp.data?.success && statusResp.data?.authenticated && statusResp.data?.data) {
+              setUser(statusResp.data.data.user);
+              setWallet(statusResp.data.data.wallet || statusResp.data.data.user.wallet || null);
+            }
+          } catch (e) {
+            // ignore
+          }
         }
         
         toast.success('Welcome to Nefsyimar! 🕊️ Please check your email to verify your account.');

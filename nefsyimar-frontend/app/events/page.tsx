@@ -55,7 +55,7 @@ const FALLBACK_EVENTS: MemorialEvent[] = [
   {
     id: '3',
     title: 'Annual Remembrance Day',
-    memorialName: 'Nebsyimar Community',
+    memorialName: 'Nefsyimar Community',
     date: '2026-07-04',
     time: '09:30 AM',
     location: 'Meskel Square, Addis Ababa',
@@ -71,7 +71,6 @@ export default function EventsPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        // Try to load real upcoming services from memorials (best-effort)
         const res = await api.get('/memorials', { params: { limit: 12 } })
         const items = res.data?.data?.memorials || []
         const mapped: MemorialEvent[] = items
@@ -105,16 +104,16 @@ export default function EventsPage() {
         <div className="absolute -bottom-32 -right-32 w-[28rem] h-[28rem] rounded-full bg-accent-300/10 blur-3xl"></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
         {/* Header */}
-        <div className="text-center mb-14 fade-in">
-          <p className="text-sm uppercase tracking-[0.25em] text-accent-400 font-medium mb-3">
+        <div className="text-center mb-14 fade-in px-2 sm:px-0">
+          <p className="text-xs sm:text-sm uppercase tracking-[0.25em] text-accent-400 font-medium mb-3">
             Gather In Remembrance
           </p>
-          <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white font-display mb-4 leading-tight">
             Memorial Events
           </h1>
-          <p className="text-accent-200/90 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-accent-200/90 text-sm sm:text-base max-w-lg sm:max-w-2xl mx-auto leading-relaxed">
             Upcoming services, anniversaries, and tributes shared by families across the community.
             Join, light a candle, and honor a life that lives on.
           </p>
@@ -125,72 +124,130 @@ export default function EventsPage() {
           </div>
         </div>
 
-        {/* Events grid */}
+        {/* Events — mobile: timeline-style vertical list, desktop: grid */}
         {isLoading ? (
           <div className="text-center text-accent-300">Loading events...</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event, idx) => (
-              <Link
-                key={event.id}
-                href={event.href}
-                className="group relative bg-gradient-to-br from-primary-800/80 to-primary-900/80 border border-accent-500/20 rounded-2xl p-6 hover:border-accent-400/60 hover:-translate-y-1 transition-all duration-300 backdrop-blur-sm"
-                style={{ animationDelay: `${idx * 80}ms` }}
-              >
-                <div className="absolute top-0 right-0 w-24 h-24 bg-accent-500/10 rounded-bl-full"></div>
+          <>
+            {/* Mobile layout: timeline */}
+            <div className="md:hidden flex flex-col gap-0 relative">
+              {/* Vertical line */}
+              <div className="absolute left-[22px] top-0 bottom-0 w-px bg-accent-500/20" />
+              {events.map((event, idx) => (
+                <Link
+                  key={event.id}
+                  href={event.href}
+                  className="group relative pl-14 pr-1 pb-8 last:pb-0"
+                  style={{ animationDelay: `${idx * 80}ms` }}
+                >
+                  {/* Timeline dot */}
+                  <div className="absolute left-[14px] top-1 w-[17px] h-[17px] rounded-full border-2 border-accent-400 bg-accent-500/30 z-10" />
 
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 bg-accent-500/20 border border-accent-400/30 rounded-xl flex items-center justify-center">
-                    <Calendar className="w-6 h-6 text-accent-300" />
-                  </div>
-                  <span className="text-xs uppercase tracking-wider text-accent-400 font-semibold">
-                    Memorial
-                  </span>
-                </div>
+                  <div className="bg-primary-800/80 border border-accent-500/20 rounded-2xl p-4 group-hover:border-accent-400/60 transition-all duration-300 shadow-lg shadow-black/20">
+                    {/* Date badge */}
+                    <span className="inline-block text-[10px] uppercase tracking-widest text-accent-400 font-semibold bg-accent-500/10 px-2.5 py-1 rounded-full mb-2">
+                      {formatDate(event.date)}
+                    </span>
 
-                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-accent-200 transition-colors line-clamp-2">
-                  {event.title}
-                </h3>
-                <p className="text-sm text-accent-300 mb-4 italic">In memory of {event.memorialName}</p>
+                    <h3 className="text-base font-bold text-white mb-1 group-hover:text-accent-200 transition-colors leading-snug">
+                      {event.title}
+                    </h3>
+                    <p className="text-xs text-accent-300 italic mb-3">In memory of {event.memorialName}</p>
 
-                <div className="space-y-2 text-sm text-gray-300">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-accent-400" />
-                    <span>{formatDate(event.date)}</span>
-                  </div>
-                  {event.time && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-accent-400" />
-                      <span>{event.time}</span>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-gray-300">
+                      {event.time && (
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="w-3 h-3 text-accent-400" />
+                          {event.time}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1.5">
+                        <MapPin className="w-3 h-3 text-accent-400" />
+                        <span className="line-clamp-1">{event.location}</span>
+                      </span>
+                      {event.attendees !== undefined && (
+                        <span className="flex items-center gap-1.5">
+                          <Users className="w-3 h-3 text-accent-400" />
+                          {event.attendees} attending
+                        </span>
+                      )}
                     </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-accent-400" />
-                    <span className="line-clamp-1">{event.location}</span>
-                  </div>
-                  {event.attendees !== undefined && (
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-accent-400" />
-                      <span>{event.attendees} attending</span>
-                    </div>
-                  )}
-                </div>
 
-                <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between text-accent-300 group-hover:text-accent-200">
-                  <span className="text-sm font-semibold uppercase tracking-wider">View details</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </Link>
-            ))}
-          </div>
+                    <div className="mt-3 flex items-center justify-end text-accent-400 gap-1 text-xs font-semibold uppercase tracking-wider group-hover:text-accent-200">
+                      View <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Desktop layout: original grid */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.map((event, idx) => (
+                <Link
+                  key={event.id}
+                  href={event.href}
+                  className="group relative bg-gradient-to-br from-primary-800/90 to-primary-900/90 border border-accent-500/20 rounded-[32px] p-5 sm:p-6 hover:border-accent-400/60 hover:-translate-y-1 transition-all duration-300 backdrop-blur-sm shadow-2xl shadow-black/20 min-h-[330px] overflow-hidden"
+                  style={{ animationDelay: `${idx * 80}ms` }}
+                >
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-accent-500/10 rounded-bl-full"></div>
+
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center gap-3 text-sm sm:text-base">
+                      <div className="inline-flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 bg-accent-500/20 border border-accent-400/30 rounded-xl">
+                        <Calendar className="w-5 h-5 text-accent-300" />
+                      </div>
+                      <span className="text-white font-semibold">{formatDate(event.date)}</span>
+                    </div>
+                    <span className="inline-flex px-2 py-1 text-[10px] sm:text-xs uppercase tracking-[0.24em] text-accent-400 font-semibold rounded-full bg-white/5">
+                      Memorial
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mt-4 mb-2 group-hover:text-accent-200 transition-colors line-clamp-3">
+                    {event.title}
+                  </h3>
+                  <p className="text-sm sm:text-base text-accent-300 mb-4 italic leading-relaxed">In memory of {event.memorialName}</p>
+
+                  <div className="space-y-3 text-sm sm:text-base text-gray-300">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-accent-400" />
+                      <span>{formatDate(event.date)}</span>
+                    </div>
+                    {event.time && (
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-accent-400" />
+                        <span>{event.time}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-accent-400" />
+                      <span className="line-clamp-2 break-words">{event.location}</span>
+                    </div>
+                    {event.attendees !== undefined && (
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-accent-400" />
+                        <span>{event.attendees} attending</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between text-accent-300 group-hover:text-accent-200">
+                    <span className="text-sm font-semibold uppercase tracking-wider">View details</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </>
         )}
 
         {/* CTA */}
-        <div className="mt-16 bg-gradient-to-r from-accent-500/10 via-accent-400/10 to-accent-500/10 border border-accent-400/30 rounded-3xl p-10 text-center">
+        <div className="mt-16 bg-gradient-to-r from-accent-500/10 via-accent-400/10 to-accent-500/10 border border-accent-400/30 rounded-3xl p-8 sm:p-10 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 font-display">
             Planning a remembrance service?
           </h2>
-          <p className="text-accent-200/90 max-w-xl mx-auto mb-6">
+          <p className="text-accent-200/90 max-w-xl mx-auto mb-6 text-sm sm:text-base">
             Create a memorial and share the service details with friends and family. Everyone you
             invite will receive a beautiful keepsake page.
           </p>

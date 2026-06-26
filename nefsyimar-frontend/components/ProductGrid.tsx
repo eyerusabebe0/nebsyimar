@@ -250,7 +250,7 @@ export default function ProductGrid({
       )}
 
       {/* Products Grid */}
-      <div className="flex overflow-x-auto gap-4 pb-4 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-5 md:overflow-visible md:pb-0 scrollbar-hide">
+      <div className="flex overflow-x-auto gap-4 pb-4 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-5 scrollbar-hide">
         <style jsx>{`
           .scrollbar-hide {
             -ms-overflow-style: none;
@@ -264,7 +264,7 @@ export default function ProductGrid({
           <div
             key={product.id}
             onClick={() => handleProductClick(product.id)}
-            className="flex-shrink-0 w-44 md:w-auto memorial-card overflow-hidden hover:shadow-2xl hover:shadow-accent-500/20 hover:border-accent-400/60 hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
+            className="flex-shrink-0 w-44 sm:w-full md:w-auto memorial-card overflow-hidden hover:shadow-2xl hover:shadow-accent-500/20 hover:border-accent-400/60 hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
           >
             {/* Product Image */}
             <div className="relative h-40 bg-gradient-to-br from-primary-800 to-primary-900 overflow-hidden">

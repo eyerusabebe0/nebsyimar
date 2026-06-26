@@ -68,7 +68,7 @@ export default function MarketplacePage() {
           <ShopItems shopId={selectedShopId} onBackToShops={handleBackToShops} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="hidden md:block md:col-span-1">
+            <div className="md:hidden">
               <MarketplaceFilters
                 city={cityFilter}
                 minPrice={minPrice}

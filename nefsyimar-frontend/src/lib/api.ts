@@ -108,6 +108,9 @@ export const userDashboardApi = {
       params: { page, limit, status },
     }),
 
+  deleteMemorial: (memorialId: string) =>
+    api.delete(`/memorials/${memorialId}`),
+
   updateMemorialSettings: (memorialId: string, settings: any) =>
     api.put(`/user/memorials/${memorialId}/settings`, { memorial_settings: settings }),
 

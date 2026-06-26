@@ -92,7 +92,7 @@ const RESOURCE_CATEGORIES = [
 ]
 
 const HOTLINES = [
-  { label: 'Nebsyimar Grief Helpline', phone: '+251 911 000 000', hours: '24 / 7' },
+  { label: 'Nefsyimar Grief Helpline', phone: '+251 911 000 000', hours: '24 / 7' },
   { label: 'Family Counseling Center', phone: '+251 911 000 001', hours: 'Mon-Sat 8am-6pm' },
   { label: 'Crisis Support', phone: '+251 911 000 002', hours: '24 / 7' },
 ]
@@ -106,16 +106,16 @@ export default function ResourcesPage() {
         <div className="absolute bottom-10 left-10 w-96 h-96 rounded-full bg-accent-300/10 blur-3xl"></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
         {/* Header */}
-        <div className="text-center mb-14 fade-in">
-          <p className="text-sm uppercase tracking-[0.25em] text-accent-400 font-medium mb-3">
+        <div className="text-center mb-14 fade-in px-2 sm:px-0">
+          <p className="text-xs sm:text-sm uppercase tracking-[0.25em] text-accent-400 font-medium mb-3">
             Care & Compassion
           </p>
-          <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white font-display mb-4 leading-tight">
             Resources for Your Journey
           </h1>
-          <p className="text-accent-200/90 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-accent-200/90 text-sm sm:text-base max-w-lg sm:max-w-2xl mx-auto leading-relaxed">
             Whether you are honoring a recent loss, preparing for a service, or supporting a loved
             one, these resources are here to walk with you, gently, every step of the way.
           </p>
@@ -126,29 +126,44 @@ export default function ResourcesPage() {
           </div>
         </div>
 
-        {/* Resource Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+        {/* Resource Grid — mobile: horizontal scroll snap cards */}
+        <div className="
+          md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-3 mb-16
+          max-md:flex max-md:gap-4 max-md:overflow-x-auto max-md:snap-x max-md:snap-mandatory
+          max-md:pb-4 max-md:-mx-4 max-md:px-4
+          max-md:[&::-webkit-scrollbar]:hidden
+        ">
           {RESOURCE_CATEGORIES.map((cat) => {
             const Icon = cat.icon
             return (
               <div
                 key={cat.title}
-                className={`group relative rounded-2xl p-6 border ${cat.border} bg-gradient-to-br ${cat.color} backdrop-blur-sm hover:-translate-y-1 transition-all duration-300`}
+                className={`
+                  group relative rounded-[32px] border ${cat.border} bg-gradient-to-br ${cat.color}
+                  backdrop-blur-sm hover:-translate-y-1 transition-all duration-300
+                  flex flex-col justify-between shadow-2xl shadow-black/20 overflow-hidden
+                  p-5 sm:p-6 h-full min-h-[360px]
+                  max-md:snap-center max-md:flex-shrink-0 max-md:w-[82vw] max-md:min-h-[340px]
+                `}
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center">
-                    <Icon className={`w-6 h-6 ${cat.iconColor}`} />
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-11 h-11 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+                      <Icon className={`w-5 h-5 ${cat.iconColor}`} />
+                    </div>
+                    <h3 className="text-lg font-bold text-white leading-snug">{cat.title}</h3>
                   </div>
-                  <h3 className="text-lg font-bold text-white">{cat.title}</h3>
+                  <p className="text-sm text-accent-100/80 leading-relaxed">
+                    {cat.description}
+                  </p>
                 </div>
-                <p className="text-sm text-accent-100/80 mb-4 leading-relaxed">{cat.description}</p>
-                <ul className="space-y-2">
+                <ul className="grid gap-2.5 mt-5">
                   {cat.items.map((item) => (
                     <li
                       key={item}
-                      className="text-sm text-gray-200 flex items-start gap-2 leading-relaxed"
+                      className="text-sm text-gray-200 flex items-start gap-3 leading-relaxed"
                     >
-                      <span className="w-1.5 h-1.5 bg-accent-400 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-accent-400 rounded-full mt-2 flex-shrink-0"></span>
                       <span>{item}</span>
                     </li>
                   ))}
@@ -158,48 +173,61 @@ export default function ResourcesPage() {
           })}
         </div>
 
-        {/* Hotlines */}
-        <div className="bg-primary-800/80 border border-accent-500/20 rounded-3xl p-8 mb-14">
+        {/* Hotlines — mobile: stacked full-width pill cards */}
+        <div className="bg-primary-800/80 border border-accent-500/20 rounded-3xl p-6 sm:p-8 mb-14 shadow-2xl shadow-black/20">
           <div className="flex items-center gap-3 mb-6">
-            <LifeBuoy className="w-7 h-7 text-accent-300" />
-            <h2 className="text-2xl font-bold text-white font-display">Helplines & Crisis Lines</h2>
+            <LifeBuoy className="w-6 h-6 text-accent-300 flex-shrink-0" />
+            <h2 className="text-xl sm:text-2xl font-bold text-white font-display">Helplines & Crisis Lines</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="
+            sm:grid sm:grid-cols-2 md:grid-cols-3 sm:gap-5
+            max-sm:flex max-sm:flex-col max-sm:gap-3
+          ">
             {HOTLINES.map((h) => (
               <div
                 key={h.label}
-                className="bg-primary-900/60 border border-primary-700 rounded-2xl p-5 hover:border-accent-400/50 transition-colors"
+                className="
+                  bg-primary-900/60 border border-primary-700 rounded-2xl
+                  hover:border-accent-400/50 transition-colors shadow-xl shadow-black/20
+                  p-5
+                  max-sm:flex max-sm:items-center max-sm:justify-between max-sm:gap-4 max-sm:rounded-2xl max-sm:py-4 max-sm:px-5
+                "
               >
-                <p className="text-xs uppercase tracking-wider text-accent-400 font-semibold mb-1">
-                  {h.label}
-                </p>
-                <p className="text-xl font-bold text-white mb-1">{h.phone}</p>
-                <p className="text-sm text-gray-400">{h.hours}</p>
+                <div className="max-sm:flex-1">
+                  <p className="text-xs uppercase tracking-wider text-accent-400 font-semibold mb-1">
+                    {h.label}
+                  </p>
+                  <p className="text-xl font-bold text-white max-sm:text-lg">{h.phone}</p>
+                </div>
+                <span className="
+                  text-sm text-gray-400
+                  max-sm:text-xs max-sm:bg-white/5 max-sm:px-2.5 max-sm:py-1 max-sm:rounded-full max-sm:whitespace-nowrap max-sm:flex-shrink-0
+                ">{h.hours}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* CTA */}
-        <div className="bg-gradient-to-r from-accent-500/10 via-accent-400/10 to-accent-500/10 border border-accent-400/30 rounded-3xl p-10 text-center">
+        <div className="bg-gradient-to-r from-accent-500/10 via-accent-400/10 to-accent-500/10 border border-accent-400/30 rounded-3xl p-6 sm:p-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 font-display">
             Need someone to talk to?
           </h2>
-          <p className="text-accent-200/90 max-w-xl mx-auto mb-6">
+          <p className="text-accent-200/90 max-w-xl mx-auto mb-6 text-sm sm:text-base">
             Our community is here for you. Reach out, share your story, or simply read others' words
             of comfort.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/contact"
-              className="inline-flex items-center px-7 py-3 bg-accent-500 hover:bg-accent-600 text-white rounded-md text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-lg shadow-accent-500/30"
+              className="inline-flex w-full sm:w-auto justify-center items-center px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white rounded-md text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-lg shadow-accent-500/30"
             >
               Contact Support
               <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
             <Link
               href="/memorials"
-              className="inline-flex items-center px-7 py-3 border border-white/40 text-white hover:bg-white/10 rounded-md text-sm font-semibold uppercase tracking-wider transition-all duration-300"
+              className="inline-flex w-full sm:w-auto justify-center items-center px-6 py-3 border border-white/40 text-white hover:bg-white/10 rounded-md text-sm font-semibold uppercase tracking-wider transition-all duration-300"
             >
               Explore Memorials
             </Link>

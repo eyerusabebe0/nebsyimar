@@ -51,7 +51,7 @@ export default function MarketplaceFilters({
       </div>
 
       {/* Location Filter */}
-      <div className="memorial-card p-4">
+      <div className="memorial-card p-4 sm:p-5">
         <button
           onClick={() => toggleSection('location')}
           className="flex items-center justify-between w-full text-white font-semibold mb-3"
@@ -104,7 +104,7 @@ export default function MarketplaceFilters({
         </button>
         {expandedSections.price && (
           <div className="space-y-3">
-            <div className="flex space-x-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:space-x-2">
               <input
                 type="number"
                 placeholder="Min"
