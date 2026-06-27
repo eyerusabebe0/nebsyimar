@@ -192,19 +192,15 @@ export default function HomeLanding() {
             </div>
           </div>
 
-        <p className="font-serif italic mb-2 md:mb-5 text-sm md:text-lg" style={{ color: 'rgba(212,175,55,0.68)' }}>
+        <p className="font-serif italic mb-2 md:mb-5 text-lg sm:text-xl md:text-2xl" style={{ color: 'rgba(212,175,55,0.75)' }}>
   "Remembering someone you love"
 </p>
 
-          <div className="mb-4 md:mb-10">
-            <h1 className="text-2xl sm:text-4xl md:text-6xl font-serif font-bold text-white leading-tight mb-0.5">
-              
-            </h1>
-            <h1 className="text-2xl sm:text-4xl md:text-6xl font-serif font-bold leading-tight">
-              <span style={{ color: '#D4AF37' }}>Preserving</span>
-              <span className="text-white"> Memories</span>
-            </h1>
-          </div>
+         
+
+          <p className="text-xs sm:text-sm md:text-base leading-relaxed max-w-md mb-4 md:mb-8" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            Nefsyimar is Ethiopia's first digital memorial platform — a sacred space where families and friends come together to honor the deceased, share stories, and keep memories alive for generations to come.
+          </p>
 
           <div className="flex flex-row gap-2 md:gap-3 max-w-full">
             <Link

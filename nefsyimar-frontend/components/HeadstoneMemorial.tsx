@@ -29,7 +29,7 @@ type LayoutConfig = {
 }
 
 const STONE_LAYOUTS: Record<HeadstoneDesignId, LayoutConfig> = {
-  stone_1: { photoShape: 'circle', photoTopPct: 9, photoSizePct: 28, photoLeftPct: 45, textPanelTopPct: 44, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05 },
+  stone_1: { photoShape: 'circle', photoTopPct: 9, photoSizePct: 28, photoLeftPct: 45, textPanelTopPct: 40, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05 },
   stone_2: { photoShape: 'circle', photoTopPct: 11, photoSizePct: 35, photoLeftPct: 50, textPanelTopPct: 48, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05 },
   stone_3: { photoShape: 'circle', photoTopPct: 12, photoSizePct: 35, photoLeftPct: 50, textPanelTopPct: 48, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05 },
   stone_4: { photoShape: 'circle', photoTopPct: 11, photoSizePct: 40, photoLeftPct: 52, textPanelTopPct: 52, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05 },
