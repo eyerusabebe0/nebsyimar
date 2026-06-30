@@ -63,7 +63,7 @@ function mapApiMemorialToProps(apiMemorial: any, currentUserId?: string) {
     name: apiMemorial.deceased_name as string,
     dates,
     location: apiMemorial.place_of_birth || '',
-    image: resolveMemorialImage(apiMemorial.profile_image),
+    image: resolveMemorialImage(apiMemorial.profile_image) || '/white.jpg',
     biography: apiMemorial.bio || '',
     family: '',
     funeral: {
