@@ -68,21 +68,6 @@ export default function MarketplacePage() {
           <ShopItems shopId={selectedShopId} onBackToShops={handleBackToShops} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="md:hidden">
-              <MarketplaceFilters
-                city={cityFilter}
-                minPrice={minPrice}
-                maxPrice={maxPrice}
-                minRating={minRating}
-                onFiltersChange={(filters) => {
-                  if (filters.city !== undefined) setCityFilter(filters.city)
-                  if (filters.minPrice !== undefined) setMinPrice(filters.minPrice)
-                  if (filters.maxPrice !== undefined) setMaxPrice(filters.maxPrice)
-                  if (filters.minRating !== undefined) setMinRating(filters.minRating)
-                }}
-              />
-            </div>
-
             <div className="md:col-span-3 space-y-6">
               <Categories selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} />
               <ProductGrid
@@ -94,6 +79,20 @@ export default function MarketplacePage() {
                 maxPrice={maxPrice}
                 minRating={minRating}
               />
+              <div className="md:hidden">
+                <MarketplaceFilters
+                  city={cityFilter}
+                  minPrice={minPrice}
+                  maxPrice={maxPrice}
+                  minRating={minRating}
+                  onFiltersChange={(filters) => {
+                    if (filters.city !== undefined) setCityFilter(filters.city)
+                    if (filters.minPrice !== undefined) setMinPrice(filters.minPrice)
+                    if (filters.maxPrice !== undefined) setMaxPrice(filters.maxPrice)
+                    if (filters.minRating !== undefined) setMinRating(filters.minRating)
+                  }}
+                />
+              </div>
               <ShopList
                 onShopSelect={handleShopSelect}
                 city={cityFilter}

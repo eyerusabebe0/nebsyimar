@@ -7,6 +7,7 @@ import { Eye, EyeOff, Mail, Lock, Heart, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import TestCredentials from '@/components/TestCredentials'
 import { authApi } from '@/lib/api'
+import { getSafeRedirectPath } from '@/lib/authRedirects'
 
 export default function SignInPage() {
   return (
@@ -42,7 +43,7 @@ function SignInPageContent() {
           const role = statusResponse.data?.data?.user?.role
 
           const redirectTo = searchParams?.get('redirect')
-          const safeRedirect = redirectTo && redirectTo.startsWith('/') ? redirectTo : '/dashboard'
+          const safeRedirect = getSafeRedirectPath(redirectTo, '/dashboard')
 
           if (role === 'Administrator') {
             router.push('/admin')
@@ -52,7 +53,7 @@ function SignInPageContent() {
             router.push(safeRedirect)
           }
         } catch {
-          router.push(searchParams?.get('redirect') && searchParams.get('redirect')?.startsWith('/') ? searchParams.get('redirect')! : '/dashboard')
+          router.push(getSafeRedirectPath(searchParams?.get('redirect'), '/dashboard'))
         }
       } else {
         setError('Invalid email or password')

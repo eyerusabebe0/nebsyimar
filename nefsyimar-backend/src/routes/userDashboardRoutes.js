@@ -8,11 +8,16 @@ const {
   getPendingComments,
   moderateComment,
   deleteComment,
-  blockUser
+  blockUser,
+  getUserRepatriationSubmissions,
+  getUserRepatriationSubmission,
+  updateRepatriationSubmission,
+  deleteRepatriationSubmission
 } = require('../controllers/userDashboardController');
 
 const { authenticate } = require('../middleware/authMiddleware');
-const { validateUUIDParam } = require('../middleware/validationMiddleware');
+const { validateUUIDParam, validateRepatriationSubmission } = require('../middleware/validationMiddleware');
+const { uploadMiddleware } = require('../utils/fileUpload');
 
 // All routes require authentication
 router.use(authenticate);
@@ -21,6 +26,16 @@ router.use(authenticate);
 router.get('/dashboard', getDashboardData);
 router.get('/memorials', getUserMemorials);
 router.get('/memorials/pending-comments', getPendingComments);
+
+router.get('/repatriation-submissions', getUserRepatriationSubmissions);
+router.get('/repatriation-submissions/:submissionId', validateUUIDParam('submissionId'), getUserRepatriationSubmission);
+router.put('/repatriation-submissions/:submissionId',
+  validateUUIDParam('submissionId'),
+  uploadMiddleware.single('death_certificate_file', 'repatriation'),
+  validateRepatriationSubmission,
+  updateRepatriationSubmission
+);
+router.delete('/repatriation-submissions/:submissionId', validateUUIDParam('submissionId'), deleteRepatriationSubmission);
 
 // Memorial management routes
 router.put('/memorials/:memorialId/settings', 

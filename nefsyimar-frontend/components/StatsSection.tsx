@@ -57,19 +57,19 @@ export default function StatsSection() {
                 Subscribed! Thank you.
               </div>
             ) : (
-              <form onSubmit={handleSubscribe} className="flex flex-col gap-2.5">
+              <form onSubmit={handleSubscribe} className="flex flex-row items-stretch gap-2.5">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email address"
                   required
-                  className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none transition"
+                  className="min-w-0 flex-1 px-4 py-3 rounded-xl text-sm text-white outline-none transition"
                   style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', caretColor: '#D4AF37' }}
                 />
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl text-sm font-bold tracking-wide uppercase transition-all duration-200 active:scale-95"
+                  className="shrink-0 px-4 py-3 rounded-xl text-sm font-bold tracking-wide uppercase transition-all duration-200 active:scale-95"
                   style={{ background: '#D4AF37', color: '#000' }}
                 >
                   Subscribe

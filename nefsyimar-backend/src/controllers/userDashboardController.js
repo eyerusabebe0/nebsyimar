@@ -1,6 +1,7 @@
-const { Memorial, User, GiftTransaction, MemorialComment, Notification } = require('../models');
+const { Memorial, User, GiftTransaction, MemorialComment, Notification, RepatriationSubmission } = require('../models');
 const { asyncHandler } = require('../middleware/errorMiddleware');
 const { sequelize } = require('../config/database');
+const { uploadFiles } = require('../utils/fileUpload');
 
 // @desc    Get user dashboard data
 // @route   GET /api/v1/user/dashboard
@@ -86,6 +87,40 @@ const getDashboardData = asyncHandler(async (req, res) => {
     limit: 5
   });
 
+  // Get user's body shipping submissions
+  const bodyShippingSubmissions = await RepatriationSubmission.findAll({
+    where: { user_id: userId },
+    order: [['created_at', 'DESC']],
+    attributes: [
+      'submission_id',
+      'deceased_full_name',
+      'date_of_birth',
+      'date_of_death',
+      'place_of_death',
+      'passport_or_id',
+      'nationality',
+      'current_location_body',
+      'shipping_agency',
+      'air_waybill_no',
+      'flight_number',
+      'departure_date',
+      'estimated_arrival_time',
+      'receiver_full_name',
+      'receiver_phone',
+      'receiver_email',
+      'receiver_alternative_phone',
+      'applicant_full_name',
+      'relationship',
+      'applicant_phone',
+      'applicant_email',
+      'death_certificate_file',
+      'embalmment_cert_file',
+      'embassy_permit_file',
+      'status',
+      'submitted_at'
+    ]
+  });
+
   // Get pending notifications count
   const pendingNotifications = await Notification.count({
     where: {
@@ -139,6 +174,34 @@ const getDashboardData = asyncHandler(async (req, res) => {
         pending_notifications: pendingNotifications,
         pending_comments: pendingCommentsCount
       },
+      body_shipping_requests: bodyShippingSubmissions.map((submission) => ({
+        id: submission.submission_id,
+        deceased_full_name: submission.deceased_full_name,
+        date_of_birth: submission.date_of_birth,
+        date_of_death: submission.date_of_death,
+        place_of_death: submission.place_of_death,
+        passport_or_id: submission.passport_or_id,
+        nationality: submission.nationality,
+        current_location_body: submission.current_location_body,
+        applicant_full_name: submission.applicant_full_name,
+        relationship: submission.relationship,
+        applicant_phone: submission.applicant_phone,
+        applicant_email: submission.applicant_email,
+        receiver_full_name: submission.receiver_full_name,
+        receiver_phone: submission.receiver_phone,
+        receiver_email: submission.receiver_email,
+        receiver_alternative_phone: submission.receiver_alternative_phone,
+        shipping_agency: submission.shipping_agency,
+        air_waybill_no: submission.air_waybill_no,
+        flight_number: submission.flight_number,
+        departure_date: submission.departure_date,
+        estimated_arrival_time: submission.estimated_arrival_time,
+        status: submission.status,
+        death_certificate_file: submission.death_certificate_file,
+        embalmment_cert_file: submission.embalmment_cert_file,
+        embassy_permit_file: submission.embassy_permit_file,
+        submitted_at: submission.submitted_at
+      })),
       recent_activity: {
         comments: recentComments.map(comment => ({
           id: comment.comment_id,
@@ -159,6 +222,262 @@ const getDashboardData = asyncHandler(async (req, res) => {
         }))
       }
     }
+  });
+});
+
+// @desc    Get user's body shipping submissions
+// @route   GET /api/v1/user/repatriation-submissions
+// @access  Private
+const getUserRepatriationSubmissions = asyncHandler(async (req, res) => {
+  const userId = req.user.user_id;
+
+  const submissions = await RepatriationSubmission.findAll({
+    where: { user_id: userId },
+    order: [['created_at', 'DESC']],
+    attributes: [
+      'submission_id',
+      'deceased_full_name',
+      'date_of_birth',
+      'date_of_death',
+      'place_of_death',
+      'passport_or_id',
+      'nationality',
+      'current_location_body',
+      'shipping_agency',
+      'air_waybill_no',
+      'flight_number',
+      'departure_date',
+      'estimated_arrival_time',
+      'receiver_full_name',
+      'receiver_phone',
+      'receiver_email',
+      'receiver_alternative_phone',
+      'applicant_full_name',
+      'relationship',
+      'applicant_phone',
+      'applicant_email',
+      'death_certificate_file',
+      'embalmment_cert_file',
+      'embassy_permit_file',
+      'status',
+      'submitted_at'
+    ]
+  });
+
+  res.json({
+    success: true,
+    data: {
+      submissions: submissions.map((submission) => ({
+        id: submission.submission_id,
+        deceased_full_name: submission.deceased_full_name,
+        date_of_birth: submission.date_of_birth,
+        date_of_death: submission.date_of_death,
+        place_of_death: submission.place_of_death,
+        passport_or_id: submission.passport_or_id,
+        nationality: submission.nationality,
+        current_location_body: submission.current_location_body,
+        shipping_agency: submission.shipping_agency,
+        air_waybill_no: submission.air_waybill_no,
+        flight_number: submission.flight_number,
+        departure_date: submission.departure_date,
+        estimated_arrival_time: submission.estimated_arrival_time,
+        receiver_full_name: submission.receiver_full_name,
+        receiver_phone: submission.receiver_phone,
+        receiver_email: submission.receiver_email,
+        receiver_alternative_phone: submission.receiver_alternative_phone,
+        applicant_full_name: submission.applicant_full_name,
+        relationship: submission.relationship,
+        applicant_phone: submission.applicant_phone,
+        applicant_email: submission.applicant_email,
+        status: submission.status,
+        death_certificate_file: submission.death_certificate_file,
+        embalmment_cert_file: submission.embalmment_cert_file,
+        embassy_permit_file: submission.embassy_permit_file,
+        submitted_at: submission.submitted_at
+      }))
+    }
+  });
+});
+
+// @desc    Get a single user body shipping submission
+// @route   GET /api/v1/user/repatriation-submissions/:submissionId
+// @access  Private
+const getUserRepatriationSubmission = asyncHandler(async (req, res) => {
+  const userId = req.user.user_id;
+  const { submissionId } = req.params;
+
+  const submission = await RepatriationSubmission.findOne({
+    where: { submission_id: submissionId, user_id: userId }
+  });
+
+  if (!submission) {
+    return res.status(404).json({
+      success: false,
+      message: 'Body shipping request not found'
+    });
+  }
+
+  res.json({
+    success: true,
+    data: {
+      id: submission.submission_id,
+      deceased_full_name: submission.deceased_full_name,
+      date_of_birth: submission.date_of_birth,
+      date_of_death: submission.date_of_death,
+      place_of_death: submission.place_of_death,
+      passport_or_id: submission.passport_or_id,
+      nationality: submission.nationality,
+      current_location_body: submission.current_location_body,
+      shipping_agency: submission.shipping_agency,
+      air_waybill_no: submission.air_waybill_no,
+      flight_number: submission.flight_number,
+      departure_date: submission.departure_date,
+      estimated_arrival_time: submission.estimated_arrival_time,
+      receiver_full_name: submission.receiver_full_name,
+      receiver_phone: submission.receiver_phone,
+      receiver_email: submission.receiver_email,
+      receiver_alternative_phone: submission.receiver_alternative_phone,
+      applicant_full_name: submission.applicant_full_name,
+      relationship: submission.relationship,
+      applicant_phone: submission.applicant_phone,
+      applicant_email: submission.applicant_email,
+      status: submission.status,
+      death_certificate_file: submission.death_certificate_file,
+      embalmment_cert_file: submission.embalmment_cert_file,
+      embassy_permit_file: submission.embassy_permit_file,
+      submitted_at: submission.submitted_at
+    }
+  });
+});
+
+// @desc    Update a body shipping submission
+// @route   PUT /api/v1/user/repatriation-submissions/:submissionId
+// @access  Private
+const updateRepatriationSubmission = asyncHandler(async (req, res) => {
+  const userId = req.user.user_id;
+  const { submissionId } = req.params;
+
+  const submission = await RepatriationSubmission.findOne({
+    where: { submission_id: submissionId, user_id: userId }
+  });
+
+  if (!submission) {
+    return res.status(404).json({
+      success: false,
+      message: 'Body shipping request not found'
+    });
+  }
+
+  const {
+    deceased_full_name,
+    date_of_birth,
+    date_of_death,
+    place_of_death,
+    passport_or_id,
+    nationality,
+    current_location_body,
+    shipping_agency,
+    air_waybill_no,
+    flight_number,
+    departure_date,
+    estimated_arrival_time,
+    receiver_full_name,
+    receiver_phone,
+    receiver_email,
+    receiver_alternative_phone,
+    applicant_full_name,
+    relationship,
+    applicant_phone,
+    applicant_email,
+  } = req.body;
+
+  const filesPayload = req.files || (req.file ? { death_certificate_file: req.file } : {});
+  const fileData = await uploadFiles(filesPayload, 'repatriation');
+
+  submission.deceased_full_name = deceased_full_name;
+  submission.date_of_birth = date_of_birth;
+  submission.date_of_death = date_of_death;
+  submission.place_of_death = place_of_death;
+  submission.passport_or_id = passport_or_id;
+  submission.nationality = nationality;
+  submission.current_location_body = current_location_body;
+  submission.shipping_agency = shipping_agency;
+  submission.air_waybill_no = air_waybill_no;
+  submission.flight_number = flight_number;
+  submission.departure_date = departure_date;
+  submission.estimated_arrival_time = estimated_arrival_time;
+  submission.receiver_full_name = receiver_full_name;
+  submission.receiver_phone = receiver_phone;
+  submission.receiver_email = receiver_email;
+  submission.receiver_alternative_phone = receiver_alternative_phone;
+  submission.applicant_full_name = applicant_full_name;
+  submission.relationship = relationship;
+  submission.applicant_phone = applicant_phone;
+  submission.applicant_email = applicant_email;
+
+  if (fileData.death_certificate_file?.[0]) {
+    submission.death_certificate_file = fileData.death_certificate_file[0];
+  }
+
+  await submission.save();
+
+  res.json({
+    success: true,
+    message: 'Body shipping request updated successfully',
+    data: {
+      id: submission.submission_id,
+      deceased_full_name: submission.deceased_full_name,
+      date_of_birth: submission.date_of_birth,
+      date_of_death: submission.date_of_death,
+      place_of_death: submission.place_of_death,
+      passport_or_id: submission.passport_or_id,
+      nationality: submission.nationality,
+      current_location_body: submission.current_location_body,
+      shipping_agency: submission.shipping_agency,
+      air_waybill_no: submission.air_waybill_no,
+      flight_number: submission.flight_number,
+      departure_date: submission.departure_date,
+      estimated_arrival_time: submission.estimated_arrival_time,
+      receiver_full_name: submission.receiver_full_name,
+      receiver_phone: submission.receiver_phone,
+      receiver_email: submission.receiver_email,
+      receiver_alternative_phone: submission.receiver_alternative_phone,
+      applicant_full_name: submission.applicant_full_name,
+      relationship: submission.relationship,
+      applicant_phone: submission.applicant_phone,
+      applicant_email: submission.applicant_email,
+      status: submission.status,
+      death_certificate_file: submission.death_certificate_file,
+      embalmment_cert_file: submission.embalmment_cert_file,
+      embassy_permit_file: submission.embassy_permit_file,
+      submitted_at: submission.submitted_at
+    }
+  });
+});
+
+// @desc    Delete a user body shipping submission
+// @route   DELETE /api/v1/user/repatriation-submissions/:submissionId
+// @access  Private
+const deleteRepatriationSubmission = asyncHandler(async (req, res) => {
+  const userId = req.user.user_id;
+  const { submissionId } = req.params;
+
+  const submission = await RepatriationSubmission.findOne({
+    where: { submission_id: submissionId, user_id: userId }
+  });
+
+  if (!submission) {
+    return res.status(404).json({
+      success: false,
+      message: 'Body shipping request not found'
+    });
+  }
+
+  await submission.destroy();
+
+  res.json({
+    success: true,
+    message: 'Body shipping request deleted successfully'
   });
 });
 
@@ -529,5 +848,9 @@ module.exports = {
   getPendingComments,
   moderateComment,
   deleteComment,
-  blockUser
+  blockUser,
+  getUserRepatriationSubmissions,
+  getUserRepatriationSubmission,
+  updateRepatriationSubmission,
+  deleteRepatriationSubmission
 };

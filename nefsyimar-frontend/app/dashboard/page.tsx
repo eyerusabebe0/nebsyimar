@@ -18,6 +18,7 @@ import {
   MessageCircle,
   Gift,
   Shield,
+  Plane,
   Trash2,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -77,6 +78,15 @@ interface RecentActivity {
   }>
 }
 
+interface BodyShippingRequest {
+  id: string
+  deceased_full_name: string
+  current_location_body?: string
+  receiver_full_name?: string
+  status: string
+  submitted_at: string
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const { user, logout, isLoading: authLoading } = useAuth()
@@ -99,6 +109,7 @@ export default function DashboardPage() {
     comments: [],
     gifts: []
   })
+  const [bodyShippingRequests, setBodyShippingRequests] = useState<BodyShippingRequest[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -131,9 +142,10 @@ export default function DashboardPage() {
       const response = await userDashboardApi.getDashboardData()
       
       if (response.data.success) {
-        const { memorials, stats, recent_activity } = response.data.data
+        const { memorials, stats, body_shipping_requests, recent_activity } = response.data.data
         setMemorials(memorials)
         setStats(stats)
+        setBodyShippingRequests(body_shipping_requests || [])
         setRecentActivity(recent_activity)
       } else {
         setError('Failed to load dashboard data')
@@ -169,6 +181,22 @@ export default function DashboardPage() {
       console.error('Failed to delete memorial:', err)
       const msg = err.response?.data?.message || 'Failed to delete memorial. Please try again.'
       toast.error(msg)
+    }
+  }
+
+  const handleDeleteBodyShipping = async (submissionId: string) => {
+    if (typeof window !== 'undefined') {
+      const confirmed = window.confirm('Are you sure you want to delete this body shipping request?')
+      if (!confirmed) return
+    }
+
+    try {
+      await userDashboardApi.deleteRepatriationSubmission(submissionId)
+      setBodyShippingRequests((prev) => prev.filter((submission) => submission.id !== submissionId))
+      toast.success('Body shipping request deleted.')
+    } catch (err: any) {
+      console.error('Failed to delete body shipping request:', err)
+      toast.error(err.response?.data?.message || 'Failed to delete body shipping request.')
     }
   }
 
@@ -407,6 +435,19 @@ export default function DashboardPage() {
                 </Link>
 
                 <Link
+                  href="/repatriation"
+                  className="group bg-primary-700 hover:bg-primary-600 active:scale-[0.98] text-white p-4 rounded-lg transition-all duration-300 lg:transform lg:hover:scale-105"
+                >
+                  <div className="flex items-center">
+                    <Plane className="w-6 h-6 mr-3 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-sm lg:text-base">Body Shipping</h4>
+                      <p className="text-xs lg:text-sm opacity-90">Submit a repatriation request</p>
+                    </div>
+                  </div>
+                </Link>
+
+                <Link
                   href="/appeals"
                   className="group bg-primary-700 hover:bg-primary-600 active:scale-[0.98] text-white p-4 rounded-lg transition-all duration-300 lg:transform lg:hover:scale-105"
                 >
@@ -419,6 +460,78 @@ export default function DashboardPage() {
                   </div>
                 </Link>
               </div>
+            </div>
+
+            {/* Body Shipping Requests */}
+            <div className="bg-primary-800/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-primary-700/50 p-5 lg:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div>
+                  <h3 className="text-lg lg:text-xl font-bold text-white">Body Shipping Requests</h3>
+                  <p className="text-accent-400 text-sm">Manage your submitted repatriation requests</p>
+                </div>
+                <Link
+                  href="/repatriation"
+                  className="inline-flex items-center justify-center bg-accent-500 hover:bg-accent-600 active:scale-95 text-white px-4 py-2 rounded-lg text-sm lg:text-base transition-all"
+                >
+                  New Request
+                </Link>
+              </div>
+              {bodyShippingRequests.length === 0 ? (
+                <div className="text-center py-8 border border-dashed border-primary-700 rounded-2xl">
+                  <p className="text-accent-300 text-sm lg:text-base mb-4">No body shipping requests have been submitted yet.</p>
+                  <Link
+                    href="/repatriation"
+                    className="inline-flex items-center justify-center bg-accent-500 hover:bg-accent-600 active:scale-95 text-white px-5 py-2 rounded-lg text-sm lg:text-base transition-all"
+                  >
+                    Submit Body Shipping Request
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {bodyShippingRequests.map((request) => (
+                    <div
+                      key={request.id}
+                      className="bg-primary-700/60 border border-primary-600 rounded-2xl p-4 sm:p-5"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div>
+                          <h4 className="text-white font-semibold text-base truncate">{request.deceased_full_name}</h4>
+                          <p className="text-accent-300 text-sm mt-1">
+                            Submitted {new Date(request.submitted_at).toLocaleDateString()}
+                          </p>
+                          <p className="text-accent-300 text-sm mt-1">
+                            Location: {request.current_location_body || 'Not specified'}
+                          </p>
+                        </div>
+                        <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                          request.status === 'APPROVED' ? 'bg-green-500/20 text-green-200' :
+                          request.status === 'DECLINED' ? 'bg-red-500/20 text-red-200' :
+                          'bg-yellow-400/15 text-yellow-200'
+                        }`}>
+                          {request.status}
+                        </span>
+                      </div>
+                      <div className="mt-4 flex items-center justify-end gap-1 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                        <Link
+                          href={`/repatriation?submissionId=${request.id}`}
+                          className="p-2 rounded-lg text-accent-300 hover:text-white hover:bg-white/5 active:scale-90 transition-all"
+                          title="Edit Request"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteBodyShipping(request.id)}
+                          className="p-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 active:scale-90 transition-all"
+                          title="Delete Request"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* My Memorials */}

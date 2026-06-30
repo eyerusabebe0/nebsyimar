@@ -125,6 +125,9 @@ export const userDashboardApi = {
   deleteComment: (memorialId: string, commentId: string) =>
     api.delete(`/user/memorials/${memorialId}/comments/${commentId}`),
 
+  deleteRepatriationSubmission: (submissionId: string) =>
+    api.delete(`/user/repatriation-submissions/${submissionId}`),
+
   blockUser: (memorialId: string, userIdToBlock: string, action: 'block' | 'unblock') =>
     api.post(`/user/memorials/${memorialId}/block-user`, { 
       user_id_to_block: userIdToBlock, 
@@ -150,6 +153,8 @@ export const appealsApi = {
 
 export const repatriationApi = {
   submitRequest: (formData: FormData) => api.post('/repatriation', formData),
+  getRequest: (submissionId: string) => api.get(`/user/repatriation-submissions/${submissionId}`),
+  updateRequest: (submissionId: string, formData: FormData) => api.put(`/user/repatriation-submissions/${submissionId}`, formData),
 };
 
 // Admin API methods

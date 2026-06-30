@@ -4,7 +4,8 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle, Upload, AlertCircle, Plane, ShieldCheck, Truck, PhoneCall, Mail, ChevronRight, ChevronLeft } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
-import { api } from '@/lib/api'
+import { api, repatriationApi } from '@/lib/api'
+import { getSafeRedirectPath } from '@/lib/authRedirects'
 
 type RepatriationFields = {
   deceased_full_name: string
@@ -55,6 +56,9 @@ function RepatriationPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user, isLoading: authLoading } = useAuth()
+  const submissionId = searchParams?.get('submissionId') || null
+  const isEditMode = Boolean(submissionId)
+  const [editLoading, setEditLoading] = useState(false)
 
   useEffect(() => {
     if (searchParams?.get('submitted') === 'true') {
@@ -62,6 +66,42 @@ function RepatriationPageContent() {
       router.replace('/repatriation')
     }
   }, [searchParams, router])
+
+  // Fetch existing submission data when editing
+  useEffect(() => {
+    if (!submissionId || authLoading || !user) return
+    let cancelled = false
+    const fetchSubmission = async () => {
+      setEditLoading(true)
+      try {
+        const res = await repatriationApi.getRequest(submissionId)
+        const data = res.data?.data || res.data
+        if (!cancelled && data) {
+          setFields({
+            deceased_full_name: data.deceased_full_name || '',
+            nationality: data.nationality || '',
+            passport_or_id: data.passport_or_id || '',
+            current_location_body: data.current_location_body || '',
+            applicant_full_name: data.applicant_full_name || '',
+            relationship: data.relationship || '',
+            applicant_phone: data.applicant_phone || '',
+            applicant_email: data.applicant_email || '',
+            receiver_full_name: data.receiver_full_name || '',
+            receiver_phone: data.receiver_phone || '',
+            receiver_email: data.receiver_email || '',
+            receiver_alternative_phone: data.receiver_alternative_phone || '',
+          })
+        }
+      } catch (err) {
+        console.error('Failed to load submission for editing:', err)
+        alert('Failed to load the submission for editing.')
+      } finally {
+        if (!cancelled) setEditLoading(false)
+      }
+    }
+    fetchSubmission()
+    return () => { cancelled = true }
+  }, [submissionId, authLoading, user])
 
   const [fields, setFields] = useState<RepatriationFields>({
     // Step 1: Deceased Information
@@ -109,7 +149,7 @@ function RepatriationPageContent() {
     }
     
     if (step === 4) {
-      if (!fl.death_certificate_file) e.death_certificate_file = 'Death certificate or medical notification file is required'
+      if (!fl.death_certificate_file && !isEditMode) e.death_certificate_file = 'Death certificate or medical notification file is required'
     }
 
     return e
@@ -172,7 +212,8 @@ function RepatriationPageContent() {
     e.preventDefault()
 
     if (!authLoading && !user) {
-      router.push('/signin?redirect=/repatriation')
+      const redirectTarget = getSafeRedirectPath('/repatriation', '/dashboard')
+      router.push(`/signup?redirect=${encodeURIComponent(redirectTarget)}`)
       return
     }
 
@@ -187,12 +228,22 @@ function RepatriationPageContent() {
       Object.entries(fields).forEach(([k, v]) => formData.append(k, v))
       if (files.death_certificate_file) formData.append('death_certificate_file', files.death_certificate_file)
 
-      const res = await api.post('/repatriation', formData)
-      if (res.status === 201) {
-        setSubmitted(true)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
+      if (isEditMode && submissionId) {
+        const res = await repatriationApi.updateRequest(submissionId, formData)
+        if (res.status === 200) {
+          setSubmitted(true)
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        } else {
+          alert('Update failed. Please try again.')
+        }
       } else {
-        alert('Submission failed. Please try again.')
+        const res = await api.post('/repatriation', formData)
+        if (res.status === 201) {
+          setSubmitted(true)
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        } else {
+          alert('Submission failed. Please try again.')
+        }
       }
     } catch {
       alert('Network error. Please check your connection and try again.')
@@ -237,37 +288,60 @@ function RepatriationPageContent() {
             style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.30)' }}>
             <CheckCircle size={32} style={{ color: '#D4AF37' }} />
           </div>
-          <h1 className="text-2xl font-serif font-bold text-white mb-3">Submitted Successfully</h1>
+          <h1 className="text-2xl font-serif font-bold text-white mb-3">{isEditMode ? 'Updated Successfully' : 'Submitted Successfully'}</h1>
           <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.50)' }}>
-            Your body shipping request has been received and forwarded to the admin team for review.
+            {isEditMode
+              ? 'Your body shipping request has been updated successfully.'
+              : 'Your body shipping request has been received and forwarded to the admin team for review.'}
           </p>
-          <button
-            onClick={() => {
-              setSubmitted(false)
-              setCurrentStep(1)
-              setFields({
-                deceased_full_name: '',
-                nationality: '',
-                passport_or_id: '',
-                current_location_body: '',
-                applicant_full_name: '',
-                relationship: '',
-                applicant_phone: '',
-                applicant_email: '',
-                receiver_full_name: '',
-                receiver_phone: '',
-                receiver_email: '',
-                receiver_alternative_phone: ''
-              })
-              setFiles({})
-              setErrors({})
-              setTouched({})
-            }}
-            className="px-6 py-3 rounded-xl text-sm font-bold tracking-wide"
-            style={{ background: '#D4AF37', color: '#000' }}
-          >
-            Submit Another Body Shipping Request
-          </button>
+          {isEditMode ? (
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="px-6 py-3 rounded-xl text-sm font-bold tracking-wide"
+              style={{ background: '#D4AF37', color: '#000' }}
+            >
+              Back to Dashboard
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setSubmitted(false)
+                setCurrentStep(1)
+                setFields({
+                  deceased_full_name: '',
+                  nationality: '',
+                  passport_or_id: '',
+                  current_location_body: '',
+                  applicant_full_name: '',
+                  relationship: '',
+                  applicant_phone: '',
+                  applicant_email: '',
+                  receiver_full_name: '',
+                  receiver_phone: '',
+                  receiver_email: '',
+                  receiver_alternative_phone: ''
+                })
+                setFiles({})
+                setErrors({})
+                setTouched({})
+              }}
+              className="px-6 py-3 rounded-xl text-sm font-bold tracking-wide"
+              style={{ background: '#D4AF37', color: '#000' }}
+            >
+              Submit Another Body Shipping Request
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  if (editLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-5" style={{ background: '#07080d' }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#D4AF37' }}></div>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.50)' }}>Loading request details...</p>
         </div>
       </div>
     )
@@ -317,7 +391,7 @@ function RepatriationPageContent() {
 
           <p className="flex items-center gap-1.5 text-xs font-semibold mb-3" style={{ color: '#D4AF37' }}>
             <PhoneCall size={13} />
-            Available 24/7. Sign in first to continue your request, then share the details below.
+            Available 24/7. Create an account to continue your request, then share the details below.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-2.5">
@@ -344,11 +418,13 @@ function RepatriationPageContent() {
 
         <div className="mb-8 md:mb-10">
           <p className="text-[9px] md:text-[11px] font-medium tracking-[0.22em] uppercase mb-2" style={{ color: 'rgba(212,175,55,0.62)' }}>
-            Body Shipping Request
+            {isEditMode ? 'Edit Request' : 'Body Shipping Request'}
           </p>
-          <h2 className="text-2xl md:text-4xl font-serif font-bold text-white mb-3">Submit Details</h2>
+          <h2 className="text-2xl md:text-4xl font-serif font-bold text-white mb-3">{isEditMode ? 'Edit Details' : 'Submit Details'}</h2>
           <p className="text-xs md:text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.42)' }}>
-            Fill in details step by step to submit a body shipping request. All fields marked with * are required.
+            {isEditMode
+              ? 'Update the details of your body shipping request. All fields marked with * are required.'
+              : 'Fill in details step by step to submit a body shipping request. All fields marked with * are required.'}
           </p>
           
           {/* Step Indicators */}
@@ -571,7 +647,11 @@ function RepatriationPageContent() {
                 className="flex-1 py-4 rounded-xl text-sm font-bold tracking-[0.12em] uppercase transition-all duration-200 active:scale-[0.98] disabled:opacity-60"
                 style={{ background: '#D4AF37', color: '#000' }}
               >
-                {loading ? 'Submitting...' : user ? 'Submit Body Repatriation Request' : 'Sign In to Continue'}
+                {loading
+                  ? (isEditMode ? 'Updating...' : 'Submitting...')
+                  : user
+                    ? (isEditMode ? 'Update Request' : 'Submit Body Repatriation Request')
+                    : 'Sign In to Continue'}
               </button>
             )}
           </div>

@@ -41,11 +41,7 @@ export default function Navigation() {
   const handleRepatriationClick = (e: React.MouseEvent) => {
     e.preventDefault()
     setIsOpen(false)
-    if (user) {
-      router.push('/repatriation')
-    } else {
-      router.push('/signin')
-    }
+    router.push('/repatriation')
   }
 
   const navItems = isAdmin

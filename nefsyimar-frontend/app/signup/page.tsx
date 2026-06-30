@@ -2,15 +2,17 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, User, Heart, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import PhoneInput from '@/components/PhoneInput'
 import type { User as ApiUser } from '@/types/api.types'
 import { authApi } from '@/lib/api'
+import { getSafeRedirectPath } from '@/lib/authRedirects'
 
 export default function SignUpPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { register } = useAuth()
   const [formData, setFormData] = useState<{
     name: string
@@ -55,13 +57,14 @@ export default function SignUpPage() {
           const statusResponse = await authApi.getAuthStatus()
           const role = statusResponse.data?.data?.user?.role
 
+          const redirectTo = getSafeRedirectPath(searchParams?.get('redirect'), '/dashboard')
           if (role === 'Administrator') {
             router.push('/admin')
           } else {
-            router.push('/dashboard')
+            router.push(redirectTo)
           }
         } catch {
-          router.push('/dashboard')
+          router.push(getSafeRedirectPath(searchParams?.get('redirect'), '/dashboard'))
         }
       } else {
         setError('Sign up failed. Please try again.')

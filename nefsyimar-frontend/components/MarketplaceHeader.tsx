@@ -1,6 +1,6 @@
 'use client'
 
-import { Search, Sparkles, ShoppingBag } from 'lucide-react'
+import { Search, Sparkles, ShoppingBag, ArrowUpDown, ChevronDown } from 'lucide-react'
 
 interface MarketplaceHeaderProps {
   searchTerm: string
@@ -51,37 +51,45 @@ export default function MarketplaceHeader({
       </div>
 
       {/* Search & Sort row */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
-        <form onSubmit={handleSearch} className="relative flex-1">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-accent-400" />
-          </div>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => onSearchTermChange(e.target.value)}
-            placeholder="Search flowers, candles, attire, gifts..."
-            className="w-full pl-12 pr-4 py-3.5 bg-primary-900/70 backdrop-blur border border-accent-500/30 rounded-2xl text-white placeholder-accent-300/60 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:border-transparent shadow-lg shadow-black/30"
-          />
-        </form>
+    <div className="flex flex-row items-center gap-2 sm:gap-3">
+  <form onSubmit={handleSearch} className="relative flex-1 min-w-0">
+    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+      <Search className="h-4.5 w-4.5 text-accent-400" />
+    </div>
+    <input
+      type="text"
+      value={searchTerm}
+      onChange={(e) => onSearchTermChange(e.target.value)}
+      placeholder="Search flowers, candles..."
+      className="w-full pl-10 pr-3 py-3 bg-primary-900/70 backdrop-blur border border-accent-500/30 rounded-xl text-white text-sm placeholder-accent-300/60 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:border-transparent shadow-lg shadow-black/30"
+    />
+  </form>
 
-        <div className="flex items-center gap-2 bg-primary-900/70 backdrop-blur border border-accent-500/30 rounded-2xl px-3 py-2 shadow-lg shadow-black/30">
-          <span className="text-xs uppercase tracking-wider text-accent-400 font-semibold">Sort</span>
-          <select
-            value={sort}
-            onChange={(e) => onSortChange(e.target.value)}
-            className="bg-transparent text-white text-sm py-3 pr-2 focus:outline-none cursor-pointer"
-          >
-            <option value="featured" className="bg-primary-900">Featured</option>
-            <option value="best_rated" className="bg-primary-900">Best rated</option>
-            <option value="price_low_high" className="bg-primary-900">Price: Low to high</option>
-            <option value="price_high_low" className="bg-primary-900">Price: High to low</option>
-            <option value="popular" className="bg-primary-900">Most popular</option>
-            <option value="newest" className="bg-primary-900">Newest</option>
-            <option value="fast_delivery" className="bg-primary-900">Fast delivery</option>
-          </select>
-        </div>
-      </div>
+  <div className="relative shrink-0">
+    <select
+      value={sort}
+      onChange={(e) => onSortChange(e.target.value)}
+      aria-label="Sort"
+      className="appearance-none bg-primary-900/70 backdrop-blur border border-accent-500/30 rounded-xl text-white text-sm font-medium pl-9 pr-8 py-3 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:border-transparent shadow-lg shadow-black/30 cursor-pointer w-[100px] sm:w-auto"
+    >
+      <option value="featured" className="bg-primary-900">Featured</option>
+      <option value="best_rated" className="bg-primary-900">Best rated</option>
+      <option value="price_low_high" className="bg-primary-900">Price: Low to high</option>
+      <option value="price_high_low" className="bg-primary-900">Price: High to low</option>
+      <option value="popular" className="bg-primary-900">Most popular</option>
+      <option value="newest" className="bg-primary-900">Newest</option>
+      <option value="fast_delivery" className="bg-primary-900">Fast delivery</option>
+    </select>
+
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <ArrowUpDown className="h-4 w-4 text-accent-400" />
+    </div>
+
+    <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
+      <ChevronDown className="h-4 w-4 text-accent-300" />
+    </div>
+  </div>
+</div>
     </div>
   )
 }

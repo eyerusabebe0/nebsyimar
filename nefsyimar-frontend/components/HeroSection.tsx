@@ -26,13 +26,13 @@ function getHeadstoneDesign(design?: string) {
 }
 
 const STONE_VISUAL_ADJUST: Record<string, { zoom: number; offsetY: number }> = {
-  stone_1:  { zoom: 1.0, offsetY: 0 },
-  stone_2:  { zoom: 1.0, offsetY: 0 },
-  stone_3:  { zoom: 1.0, offsetY: 0 },
-  stone_4:  { zoom: 1.0, offsetY: 0 },
-  stone_6:  { zoom: 1.0, offsetY: 0 },
-  stone_8:  { zoom: 1.0, offsetY: 0 },
-  stone_9:  { zoom: 1.0, offsetY: 0 },
+  stone_1: { zoom: 1.0, offsetY: 0 },
+  stone_2: { zoom: 1.0, offsetY: 0 },
+  stone_3: { zoom: 1.0, offsetY: 0 },
+  stone_4: { zoom: 1.0, offsetY: 0 },
+  stone_6: { zoom: 1.0, offsetY: 0 },
+  stone_8: { zoom: 1.0, offsetY: 0 },
+  stone_9: { zoom: 1.0, offsetY: 0 },
   stone_10: { zoom: 1.0, offsetY: 0 },
 }
 
@@ -97,7 +97,7 @@ export default function HomeLanding() {
   const NAME_BOX_HEIGHT = 36
   const CARD_HEIGHT = scaledHeight + NAME_BOX_HEIGHT
 
-const RenderCard = ({ m, idx }: { m: any; idx: number }) => {
+  const RenderCard = ({ m, idx }: { m: any; idx: number }) => {
     const apiDesign = typeof m.memorial_settings?.headstone_design === 'string'
       ? m.memorial_settings.headstone_design
       : undefined
@@ -225,7 +225,7 @@ const RenderCard = ({ m, idx }: { m: any; idx: number }) => {
     <main className="bg-primary-950 min-h-screen text-white">
 
       {/* ══════════════════ HERO ══════════════════ */}
-      <section className="relative min-h-[40vh] md:min-h-[72vh] flex items-center mb-50">
+      <section className="relative min-h-[45vh] sm:min-h-[56vh] md:min-h-[72vh] flex items-center mb-1 sm:mb-50">
         <div
           className="absolute inset-0 bg-center bg-cover bg-no-repeat"
           style={{ backgroundImage: "url('/hero.png')" }}
@@ -237,7 +237,7 @@ const RenderCard = ({ m, idx }: { m: any; idx: number }) => {
           style={{ background: 'linear-gradient(to right, transparent, #D4AF37, transparent)', opacity: 0.65 }} />
 
         <div className="relative z-10 w-full px-5 sm:px-8 md:px-16 py-7 md:py-24">
-          <div className="flex items-center gap-2.5 md:gap-5 mb-3 md:mb-8">
+          <div className="flex items-center gap-2.5 md:gap-5  mb-3 md:mb-8">
             <Image src="/Logo.png" alt="Nefsyimar" width={40} height={40} className="object-contain md:w-[74px] md:h-[74px]" />
             <div className="w-px h-8 md:h-14" style={{ background: 'rgba(212,175,55,0.35)' }} />
             <div>
@@ -282,23 +282,23 @@ const RenderCard = ({ m, idx }: { m: any; idx: number }) => {
       {/* ══════════════════ MARQUEE ══════════════════ */}
       <section className="pt-5 pb-4 md:pt-8 md:pb-6 overflow-hidden">
 
-        <div className="h-px mb-7 -mt-8" style={{ background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.45), transparent)' }} />
-        <div className="max-w-7xl mx-auto px-5 md:px-8 mb-7 md:mb-3 flex items-end justify-between">
-          <div>
-            <p className="text-[9px] md:text-[11px] font-medium tracking-[0.18em] uppercase mb-1" style={{ color: 'rgba(212,175,55,0.58)' }}>
+        <div className="h-[3px] mb-7 -mt-8 rounded-full opacity-100 shadow-[0_0_18px_rgba(212,175,55,0.35)]" style={{ background: 'linear-gradient(to right, transparent, #D4AF37, transparent)' }} />
+      <div className="max-w-7xl mx-auto px-5 md:px-8 mb-7 md:mb-3">
+          <div className="flex flex-row items-center justify-between gap-3">
+            <p className="text-[9px] md:text-[11px] font-medium tracking-[0.18em] uppercase" style={{ color: 'rgba(212,175,55,0.58)' }}>
               In Loving Memory
             </p>
-            <h2 className="text-lg sm:text-xl md:text-3xl font-serif font-bold text-white leading-tight">
-              Remembering Beautiful Lives
-            </h2>
+            <Link
+              href="/memorials"
+              className="flex shrink-0 items-center gap-1.5 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg transition-all duration-200 whitespace-nowrap"
+              style={{ color: '#D4AF37', border: '1px solid rgba(212,175,55,0.28)' }}
+            >
+              See All <ArrowRight size={12} />
+            </Link>
           </div>
-          <Link
-            href="/memorials"
-            className="flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg transition-all duration-200 whitespace-nowrap"
-            style={{ color: '#D4AF37', border: '1px solid rgba(212,175,55,0.28)' }}
-          >
-            See All <ArrowRight size={12} />
-          </Link>
+          <h2 className="text-lg sm:text-xl md:text-3xl font-serif font-bold text-white leading-tight text-center md:text-left mt-1">
+            Remembering Beautiful Lives
+          </h2>
         </div>
         <div className="flex items-center justify-center gap-3 mb-2 md:mb-3">
           <div className="h-px w-10 sm:w-14 md:w-20" style={{ background: 'rgba(212,175,55,0.45)' }} />
@@ -316,14 +316,14 @@ const RenderCard = ({ m, idx }: { m: any; idx: number }) => {
           </div>
         </div>
 
-        <div className="h-px mt-3" style={{ background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.22), transparent)' }} />
+        <div className="h-[2px] mt-3 rounded-full opacity-100" style={{ background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.55), transparent)' }} />
       </section>
 
       {/* ══════════════════ RECENTLY CREATED ══════════════════ */}
       <section className="max-w-6xl mx-auto px-5 md:px-8 py-8 md:py-14">
-        <div className="mb-5 md:mb-7 flex items-end justify-between gap-3">
+        <div className="mb-5 md:mb-7 flex flex-col items-center justify-center gap-2 text-center md:flex-row md:items-end md:justify-between md:text-left">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center justify-center gap-2 mb-1 md:justify-start">
               <Calendar size={14} style={{ color: '#D4AF37' }} />
               <p className="text-[9px] md:text-[11px] font-medium tracking-[0.18em] uppercase text-[#D4AF37]/60">
                 Recently Created
@@ -428,10 +428,7 @@ const RenderCard = ({ m, idx }: { m: any; idx: number }) => {
             <div className="md:pl-8">
               <p className="text-xs sm:text-sm md:text-lg leading-relaxed font-light text-center md:text-left"
                 style={{ color: 'rgba(255,255,255,0.55)' }}>
-                Nefsyimar is Ethiopia's first digital memorial platform, designed to honor the deceased,
-                connect communities, and preserve memories with dignity and compassion. We provide a
-                sacred digital space where families and friends can come together to celebrate lives
-                and keep memories alive forever.
+                Nefsyimar is Ethiopia’s pioneer digital memorial platform and the world's first to integrate interactive 3D monuments, offering a dignified global space for honoring loved ones. By combining immersive virtual legacy preservation with a seamless digital gifting ecosystem—including symbolic flowers and candles—it empowers families and communities worldwide to celebrate lives, share grief, and sustain enduring memories with profound respect.
               </p>
             </div>
           </div>
