@@ -17,7 +17,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/a
 const API_ORIGIN = API_BASE_URL.replace(/\/api\/v1\/?$/, '')
 
 function resolveMemorialImage(path?: string | null) {
-  if (!path) return '/images.jpg'
+  if (!path) return undefined
   if (path.startsWith('http://') || path.startsWith('https://')) return path
   if (path.startsWith('/uploads')) return `${API_ORIGIN}${path}`
   return path
@@ -74,11 +74,11 @@ function mapApiMemorialToProps(apiMemorial: any, currentUserId?: string) {
     },
     coverImage: resolveMemorialImage(apiMemorial.cover_image),
     galleryImages: Array.isArray(apiMemorial.gallery_images)
-      ? apiMemorial.gallery_images.map((path: string) => resolveMemorialImage(path))
+      ? apiMemorial.gallery_images.map((path: string) => resolveMemorialImage(path)).filter(Boolean) as string[]
       : [],
     creatorId: apiMemorial.user_id as string,
     isOwner: currentUserId === apiMemorial.user_id,
-    headstoneDesign: ['stone_1','stone_2','stone_3','stone_4','stone_6','stone_7','stone_8','stone_9'].includes(apiMemorial.memorial_settings?.headstone_design)
+    headstoneDesign: ['stone_1','stone_2','stone_3','stone_4','stone_6','stone_8','stone_9','stone_10'].includes(apiMemorial.memorial_settings?.headstone_design)
       ? apiMemorial.memorial_settings.headstone_design
       : 'stone_2',
     memorialSettings: apiMemorial.memorial_settings || {

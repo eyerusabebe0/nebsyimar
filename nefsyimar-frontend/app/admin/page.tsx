@@ -459,6 +459,13 @@ export default function AdminPage() {
               <span>Appeals</span>
             </button>
             <button
+              onClick={() => router.push('/admin/body-shipping')}
+              className="flex items-center justify-center space-x-2 px-4 py-3 bg-primary-700 hover:bg-primary-600 rounded-lg transition-colors"
+            >
+              <span>✈️</span>
+              <span>Body Shipping</span>
+            </button>
+            <button
               onClick={() => router.push('/admin/settings/fees')}
               className="flex items-center justify-center space-x-2 px-4 py-3 bg-primary-700 hover:bg-primary-600 rounded-lg transition-colors"
             >

@@ -57,7 +57,7 @@ const upload = multer({
   fileFilter,
   limits: {
     fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024, // 10MB default
-    files: 10 // Maximum 10 files per request
+    files: 100 // Maximum 100 files per request
   }
 });
 
@@ -99,7 +99,7 @@ const uploadMiddleware = {
     upload.fields([
       { name: 'profile_image', maxCount: 1 },
       { name: 'cover_image', maxCount: 1 },
-      { name: 'gallery_images', maxCount: 10 }
+      { name: 'gallery_images', maxCount: 100 }
     ])
   ],
 
@@ -112,7 +112,7 @@ const uploadMiddleware = {
     upload.fields([
       { name: 'logo', maxCount: 1 },
       { name: 'cover_image', maxCount: 1 },
-      { name: 'gallery_images', maxCount: 10 },
+      { name: 'gallery_images', maxCount: 100 },
       { name: 'documents', maxCount: 5 }
     ])
   ],

@@ -280,6 +280,56 @@ const validateProductCreation = [
   handleValidationErrors
 ];
 
+const validateRepatriationSubmission = [
+  body('deceased_full_name')
+    .trim()
+    .notEmpty()
+    .withMessage('Deceased full name is required'),
+
+  body('passport_or_id')
+    .trim()
+    .notEmpty()
+    .withMessage('Passport or ID is required'),
+
+  body('current_location_body')
+    .trim()
+    .notEmpty()
+    .withMessage('Current body location is required'),
+
+  body('applicant_full_name')
+    .trim()
+    .notEmpty()
+    .withMessage('Applicant full name is required'),
+
+  body('applicant_phone')
+    .trim()
+    .notEmpty()
+    .withMessage('Applicant phone number is required'),
+
+  body('applicant_email')
+    .trim()
+    .isEmail()
+    .withMessage('Applicant email must be valid'),
+
+  body('receiver_full_name')
+    .trim()
+    .notEmpty()
+    .withMessage('Receiver full name is required'),
+
+  body('receiver_phone')
+    .trim()
+    .notEmpty()
+    .withMessage('Receiver phone number is required'),
+
+  body('receiver_email')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isEmail()
+    .withMessage('Receiver email must be valid'),
+
+  handleValidationErrors
+];
+
 // Order validation rules
 const validateOrderCreation = [
   body('vendor_id')
@@ -378,6 +428,7 @@ module.exports = {
   validateVendorRegistration,
   validateProductCreation,
   validateOrderCreation,
+  validateRepatriationSubmission,
   validatePagination,
   validateUUIDParam,
   validateSearch

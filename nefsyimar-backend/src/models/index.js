@@ -22,6 +22,7 @@ const Appeal = require('./Appeal');
 const FeeConfig = require('./FeeConfig');
 const SystemSetting = require('./SystemSetting');
 const AdminActionLog = require('./AdminActionLog');
+const RepatriationSubmission = require('./RepatriationSubmission');
 
 // Define associations
 
@@ -71,6 +72,12 @@ User.hasOne(VendorAccount, {
 User.hasMany(Order, { 
   foreignKey: 'buyer_id', 
   as: 'orders',
+  onDelete: 'CASCADE'
+});
+
+User.hasMany(RepatriationSubmission, {
+  foreignKey: 'user_id',
+  as: 'repatriation_submissions',
   onDelete: 'CASCADE'
 });
 
@@ -419,6 +426,11 @@ UserStatusHistory.belongsTo(User, {
   as: 'changed_by_user'
 });
 
+RepatriationSubmission.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
 Report.belongsTo(User, {
   foreignKey: 'reporter_id',
   as: 'reporter',
@@ -523,4 +535,5 @@ module.exports = {
   FeeConfig,
   SystemSetting,
   AdminActionLog,
+  RepatriationSubmission,
 };

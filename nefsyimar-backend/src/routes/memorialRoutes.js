@@ -43,7 +43,7 @@ router.use(authenticate);
 
 // Memorial management (with image uploads)
 router.post('/',
-  userRateLimit(10, 60 * 60 * 1000),
+  userRateLimit(100, 60 * 60 * 1000),
   uploadMiddleware.memorial,
   validateMemorialCreation,
   createMemorial

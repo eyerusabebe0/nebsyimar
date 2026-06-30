@@ -176,6 +176,38 @@ export default function MemorialContent({ memorial, initialRecentGifts }: Memori
   const [tributePage, setTributePage] = useState(0)
   const [showAllTributes, setShowAllTributes] = useState(false)
   const [showAllPhotos, setShowAllPhotos] = useState(false)
+  const [defaultGalleryPhotos, setDefaultGalleryPhotos] = useState(2)
+  const [galleryOverflow, setGalleryOverflow] = useState(false)
+
+  useEffect(() => {
+    const updateGalleryState = () => {
+      const width = window.innerWidth
+      const columns = width >= 1024 ? 3 : width >= 640 ? 3 : 2
+      setDefaultGalleryPhotos(columns)
+
+      const galleryImages = Array.isArray(memorial.galleryImages)
+        ? memorial.galleryImages.filter(Boolean)
+        : []
+      const imageCount = galleryImages.length + (memorial.coverImage ? 1 : 0)
+
+      const gap = 16
+      const containerWidth = Math.min(width - 48, 1200)
+      const cardWidth = containerWidth / columns
+      const cardHeight = cardWidth * 0.75
+      const rows = Math.max(1, Math.ceil(imageCount / columns))
+      const estimatedHeight = rows * cardHeight + (rows - 1) * gap
+
+      setGalleryOverflow(estimatedHeight > window.innerHeight * 0.82)
+    }
+
+    updateGalleryState()
+    window.addEventListener('resize', updateGalleryState)
+    return () => window.removeEventListener('resize', updateGalleryState)
+  }, [memorial.galleryImages])
+
+  useEffect(() => {
+    setShowAllPhotos(false)
+  }, [memorial.galleryImages])
 
   useEffect(() => {
     const loadGifts = async () => {
@@ -734,27 +766,35 @@ function GrassOverlay() {
 
         {(() => {
           const images: string[] = [];
+          const coverUrl = resolveMemorialImageUrl(memorial.coverImage);
+          if (coverUrl) {
+            images.push(coverUrl);
+          }
+
           if (Array.isArray(memorial.galleryImages)) {
             memorial.galleryImages.forEach((img) => {
               const url = resolveMemorialImageUrl(img);
-              if (url) images.push(url);
+              if (url && !images.includes(url)) images.push(url);
             });
           }
 
           if (!images.length) {
             return (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
-                {[1, 2, 3].map((index) => (
-                  <div key={index} className="aspect-[4/3] rounded-2xl sm:rounded-3xl border border-white/10 bg-gradient-to-br from-primary-950 to-slate-950 flex items-center justify-center overflow-hidden">
-                    <Users className="w-8 h-8 sm:w-12 sm:h-12 text-accent-500" />
-                  </div>
-                ))}
+              <div className="rounded-3xl border border-white/10 bg-primary-900/40 p-8 text-center">
+                <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/5 text-accent-300 mb-4">
+                  <Users className="w-7 h-7" />
+                </div>
+                <p className="text-sm font-semibold text-white mb-2">No photo memories yet</p>
+                <p className="text-xs text-white/50 max-w-md mx-auto">
+                  This memorial doesn't have any gallery photos yet. Add cherished images to keep the memory alive.
+                </p>
               </div>
             );
           }
 
-          // Show exactly 2 photos on every screen size until "See More" is clicked
-          const displayItems = showAllPhotos ? images : images.slice(0, 2);
+          const displayLimit = showAllPhotos ? images.length : defaultGalleryPhotos
+          const shouldShowSeeMore = !showAllPhotos && images.length > defaultGalleryPhotos && galleryOverflow
+          const displayItems = showAllPhotos || !shouldShowSeeMore ? images : images.slice(0, displayLimit)
 
           return (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
@@ -774,21 +814,23 @@ function GrassOverlay() {
               ))}
 
               {/* See More tile */}
-              {!showAllPhotos && images.length > 2 && (
+              {shouldShowSeeMore && (
                 <button
                   type="button"
                   onClick={() => setShowAllPhotos(true)}
                   className="group relative flex items-center justify-center aspect-[4/3] overflow-hidden rounded-2xl sm:rounded-[28px] border border-accent-500/20 bg-primary-950/80 transition-all duration-300 hover:border-accent-400/40 hover:bg-accent-500/10"
                 >
                   <span className="flex flex-col items-center gap-1 sm:gap-2 text-xs sm:text-sm font-semibold text-white">
-                    <span>See More...</span>
-                    <span className="text-[10px] sm:text-xs text-accent-300">{images.length - 2} more photos</span>
+                    <span>See More</span>
+                    <span className="text-[10px] sm:text-xs text-accent-300">
+                      {images.length - defaultGalleryPhotos} more photo{images.length - defaultGalleryPhotos === 1 ? '' : 's'}
+                    </span>
                   </span>
                 </button>
               )}
 
-              {/* See Less tile, shown after expanding */}
-              {showAllPhotos && images.length > 2 && (
+              {/* Show Less tile, shown after expanding */}
+              {showAllPhotos && images.length > defaultGalleryPhotos && (
                 <button
                   type="button"
                   onClick={() => setShowAllPhotos(false)}

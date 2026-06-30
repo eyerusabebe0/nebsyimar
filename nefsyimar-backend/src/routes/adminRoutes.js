@@ -9,6 +9,8 @@ const { validateUUIDParam, validatePagination, validateUserRegistration } = requ
 const { createAdminUser } = require('../controllers/authController');
 const { logAdminAction } = require('../utils/adminAudit');
 
+const { getRepatriationSubmissions } = require('../controllers/repatriationController');
+
 // Import admin-specific controller functions
 const {
   getPendingVendors,
@@ -69,6 +71,9 @@ router.get('/vendors/pending', validatePagination, getPendingVendors);
 router.post('/vendors/:vendorId/verify', validateUUIDParam('vendorId'), verifyVendor);
 router.post('/vendors/:vendorId/reject', validateUUIDParam('vendorId'), rejectVendor);
 router.post('/vendors/:vendorId/limits', validateUUIDParam('vendorId'), updateVendorLimits);
+
+// Repatriation / body shipping submissions
+router.get('/repatriation-submissions', validatePagination, getRepatriationSubmissions);
 
 // System statistics endpoint (shared handler for /stats/overview and legacy /stats)
 const getSystemStats = async (req, res) => {

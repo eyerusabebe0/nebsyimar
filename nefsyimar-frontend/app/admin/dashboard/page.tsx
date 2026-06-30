@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Users, Plus, Shield, Settings, BarChart3, UserCheck, FileSearch } from 'lucide-react';
+import { Users, Plus, Shield, Settings, BarChart3, UserCheck, FileSearch, Plane } from 'lucide-react';
 import Link from 'next/link';
 import { adminApi } from '@/lib/api';
 
@@ -191,6 +191,19 @@ export default function AdminDashboard() {
                 <div className="ml-4">
                   <h3 className="text-xl font-bold text-white">Manage Memorials</h3>
                   <p className="text-gray-300 mt-1">Oversee memorial content</p>
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Body Shipping */}
+          <Link href="/admin/body-shipping">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer group">
+              <div className="flex items-center">
+                <Plane className="h-8 w-8 text-cyan-400 group-hover:scale-110 transition-transform" />
+                <div className="ml-4">
+                  <h3 className="text-xl font-bold text-white">Body Shipping</h3>
+                  <p className="text-gray-300 mt-1">Review repatriation and transport requests</p>
                 </div>
               </div>
             </div>

@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast'
 import { useAuth } from '@/contexts/AuthContext'
 import api from '@/lib/api'
 import { HeadstonePreview } from '../../../components/HeadstoneMemorial'
+import type { HeadstoneDesignId } from '../../../components/HeadstoneMemorial'
 import {
   ArrowLeft, BookOpen, Calendar, ChevronLeft, ChevronRight,
   Heart, Info, MapPin, Upload
@@ -22,19 +23,16 @@ interface MemorialFormData {
   googleMapsLink: string; obituaryText: string
 }
 
-type HeadstoneDesignId = 'stone_1'|'stone_2'|'stone_3'|'stone_4'|'stone_6'|'stone_7'|'stone_8'|'stone_9'
-
 const relationshipOptions = ['Family member','Friend','Colleague','Funeral director','Charity staff','Other']
 
 const STONE_OPTIONS: Array<{id: HeadstoneDesignId; label: string; description: string; src: string; price: number; extraFee?: number}> = [
-  { id: 'stone_1', label: 'Rugged Sandstone',   description: 'Natural, earthy character.',      src: '/STONES/stone_1.png', price: 100   },
-  { id: 'stone_2', label: 'Classic Granite',     description: 'Timeless arched silhouette.',     src: '/STONES/stone_2.png', price: 250   },
-  { id: 'stone_3', label: 'Black Granite Rose',  description: 'Elegant polished black granite.', src: '/STONES/stone_3.png', price: 500   },
-  { id: 'stone_4', label: 'Cream Marble',        description: 'Soft, peaceful cream finish.',    src: '/STONES/stone_4.png', price: 1000  },
-  { id: 'stone_6', label: 'Marble Cathedral',    description: 'Ornate marble with carved arch.', src: '/STONES/stone_6.png', price: 5000  },
-  { id: 'stone_7', label: 'Garden Granite',      description: 'Granite framed in greenery.',     src: '/STONES/stone_7.png', price: 8000  },
-  { id: 'stone_8', label: 'Cross of Faith',      description: 'Black granite with carved cross.',src: '/STONES/stone_8.png', price: 12000 },
-  { id: 'stone_9', label: 'Angel Heart',         description: 'Black granite heart with angel.', src: '/STONES/stone_9.png', price: 18000, extraFee: 300 },
+  { id: 'stone_1', label: 'Rugged Sandstone',   description: 'Natural, earthy character.',      src: '/STONES/stone_1.png', price: 0   },
+  { id: 'stone_2', label: 'Classic Granite',     description: 'Timeless arched silhouette.',     src: '/STONES/stone_2.png', price: 0   },
+  { id: 'stone_3', label: 'Black Granite Rose',  description: 'Elegant polished black granite.', src: '/STONES/stone_3.png', price: 0   },
+  { id: 'stone_4', label: 'Cream Marble',        description: 'Soft, peaceful cream finish.',    src: '/STONES/stone_4.png', price: 0   },
+  { id: 'stone_6', label: 'Marble Cathedral',    description: 'Ornate marble with carved arch.', src: '/STONES/stone_6.png', price: 0   },
+  { id: 'stone_8', label: 'Cross of Faith',      description: 'Black granite with carved cross.',src: '/STONES/stone_8.png', price: 0   },
+  { id: 'stone_9', label: 'Angel Heart',         description: 'Black granite heart with angel.', src: '/STONES/stone_9.png', price: 0, extraFee: 300 },
 ]
 
 const inp = "w-full px-3 py-2.5 bg-primary-700/50 border border-primary-600 rounded-xl text-white text-sm placeholder-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500"
@@ -67,6 +65,8 @@ export default function CreateMemorialPage() {
   const [submitMessage, setSubmitMessage] = useState<string | null>(null)
   const [dateError, setDateError] = useState<string>('')
 
+  const todayStr = new Date().toISOString().split('T')[0]
+
   useEffect(() => {
     if (!profilePhoto) { setProfilePreviewUrl(''); return }
     const url = URL.createObjectURL(profilePhoto)
@@ -78,22 +78,33 @@ export default function CreateMemorialPage() {
     if (!isLoading && !user) router.push('/signin')
   }, [isLoading, user, router])
 
-  // Validate dates whenever either changes
+  // ── Unified date validation: birth date, death date, and funeral date
+  // are all checked against each other so they can never contradict.
   useEffect(() => {
-    if (formData.dateOfBirth && formData.dateOfDeath) {
-      const dob = new Date(formData.dateOfBirth)
-      const dod = new Date(formData.dateOfDeath)
-      if (dod < dob) {
-        setDateError('Date of death cannot be before date of birth.')
-      } else if (dod.getTime() === dob.getTime()) {
-        setDateError('Date of death cannot be the same as date of birth.')
-      } else {
-        setDateError('')
-      }
-    } else {
-      setDateError('')
+    const { dateOfBirth, dateOfDeath, funeralDate } = formData
+    const dob = dateOfBirth ? new Date(dateOfBirth) : null
+    const dod = dateOfDeath ? new Date(dateOfDeath) : null
+    const fun = funeralDate ? new Date(funeralDate) : null
+    const today = new Date(todayStr)
+
+    let error = ''
+
+    if (dob && dob > today) {
+      error = 'Date of birth cannot be in the future.'
+    } else if (dod && dod > today) {
+      error = 'Date of death cannot be in the future.'
+    } else if (dob && dod && dod < dob) {
+      error = 'Date of death cannot be before date of birth.'
+    } else if (dob && dod && dod.getTime() === dob.getTime()) {
+      error = 'Date of death cannot be the same as date of birth.'
+    } else if (fun && dod && fun < dod) {
+      error = 'Funeral date cannot be before the date of death.'
+    } else if (fun && dob && !dod && fun < dob) {
+      error = 'Funeral date cannot be before the date of birth.'
     }
-  }, [formData.dateOfBirth, formData.dateOfDeath])
+
+    setDateError(error)
+  }, [formData.dateOfBirth, formData.dateOfDeath, formData.funeralDate, todayStr])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -110,18 +121,10 @@ export default function CreateMemorialPage() {
     e.preventDefault()
     setSubmitMessage(null)
 
-    // Date validation guard
+    // Date validation guard — covers birth/death/funeral together
     if (dateError) {
       toast.error(dateError)
       return
-    }
-    if (formData.dateOfBirth && formData.dateOfDeath) {
-      const dob = new Date(formData.dateOfBirth)
-      const dod = new Date(formData.dateOfDeath)
-      if (dod <= dob) {
-        toast.error('Date of death must be after date of birth.')
-        return
-      }
     }
 
     setIsSubmitting(true)
@@ -152,7 +155,7 @@ export default function CreateMemorialPage() {
       if (profilePhoto) fd.append('profile_image', profilePhoto)
       if (coverPhoto)   fd.append('cover_image',   coverPhoto)
       galleryPhotos.forEach(f => fd.append('gallery_images', f))
-      const res = await api.post('/memorials', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const res = await api.post('/memorials', fd)
       if (res.data?.success) {
         toast.success('Memorial created successfully.')
         setSubmitMessage('Your memorial has been created and published.')
@@ -263,7 +266,7 @@ export default function CreateMemorialPage() {
                   <label className="block text-sm font-medium text-accent-300 mb-2">Date of birth *</label>
                   <input
                     type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} required
-                    max={formData.dateOfDeath || undefined}
+                    max={formData.dateOfDeath || todayStr}
                     className={`${inpDesktop} ${dateError ? 'border-red-400 focus:ring-red-400' : ''}`}
                   />
                 </div>
@@ -272,7 +275,7 @@ export default function CreateMemorialPage() {
                   <input
                     type="date" name="dateOfDeath" value={formData.dateOfDeath} onChange={handleInputChange} required
                     min={formData.dateOfBirth || undefined}
-                    max={new Date().toISOString().split('T')[0]}
+                    max={todayStr}
                     className={`${inpDesktop} ${dateError ? 'border-red-400 focus:ring-red-400' : ''}`}
                   />
                 </div>
@@ -318,7 +321,7 @@ export default function CreateMemorialPage() {
                   <label className="block text-[10px] font-semibold text-accent-400 mb-1">Date of birth *</label>
                   <input
                     type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} required
-                    max={formData.dateOfDeath || undefined}
+                    max={formData.dateOfDeath || todayStr}
                     className={`${inp} ${dateError ? 'border-red-400' : ''}`}
                   />
                 </div>
@@ -327,7 +330,7 @@ export default function CreateMemorialPage() {
                   <input
                     type="date" name="dateOfDeath" value={formData.dateOfDeath} onChange={handleInputChange} required
                     min={formData.dateOfBirth || undefined}
-                    max={new Date().toISOString().split('T')[0]}
+                    max={todayStr}
                     className={`${inp} ${dateError ? 'border-red-400' : ''}`}
                   />
                 </div>
@@ -401,27 +404,25 @@ export default function CreateMemorialPage() {
               </div>
             </section>
 
-            {/* SECTION 3 — Payment Desktop */}
+            {/* SECTION 3 — Payment Desktop (only shown when payment is required) */}
+            {requiresPayment && (
             <section className={`hidden md:block ${card} p-6 space-y-4`}>
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-semibold text-white">Payment &amp; Publishing</h2>
                   <p className="text-sm text-accent-300">
-                  {requiresPayment
-                    ? `A premium fee of ${premiumFee.toLocaleString()} birr is required for the selected Angel Heart headstone.`
-                    : 'No premium payment is required for the selected headstone.'}
+                  {`A premium fee of ${premiumFee.toLocaleString()} birr is required for the selected headstone.`}
                 </p>
                 </div>
-                {!PAYMENT_ACTIVE && <div className="text-sm text-accent-400 italic">(Temporarily inactive)</div>}
               </div>
-              <div className={`bg-primary-900/60 border border-primary-700 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 ${!PAYMENT_ACTIVE ? 'opacity-60 pointer-events-none' : ''}`}>
+              <div className={`bg-primary-900/60 border border-primary-700 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3`}>
                 <div>
                   <p className="text-sm text-accent-200 mb-1">Deduct <span className="font-semibold text-white">{creationFee.toLocaleString()} birr</span> from wallet?</p>
                   {wallet && <p className="text-xs text-accent-400">Balance: <span className="font-semibold text-accent-200">{Number(wallet.balance ?? 0).toLocaleString()} {wallet.currency || 'ETB'}</span></p>}
                 </div>
                 <div className="flex gap-3">
                   {(['yes','no'] as const).map(v => (
-                    <button key={v} type="button" onClick={() => setPaymentAgreement(v)} disabled={!PAYMENT_ACTIVE}
+                    <button key={v} type="button" onClick={() => setPaymentAgreement(v)}
                       className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${paymentAgreement === v ? (v==='yes'?'bg-accent-500 text-white':'bg-red-600 text-white') : 'bg-primary-700 text-accent-200 hover:bg-primary-600'}`}>
                       {v === 'yes' ? 'Yes' : 'No'}
                     </button>
@@ -434,22 +435,22 @@ export default function CreateMemorialPage() {
                 </div>
               )}
             </section>
+            )}
 
-            {/* SECTION 3 — Payment Mobile */}
+            {/* SECTION 3 — Payment Mobile (only shown when payment is required) */}
+            {requiresPayment && (
             <section className={`md:hidden ${cardM}`}>
               <div className="flex items-center justify-between mb-1">
                 <h2 className="text-[13px] font-bold text-white">Payment</h2>
-                {!PAYMENT_ACTIVE && <span className="text-[9px] text-accent-400 italic px-2 py-0.5 rounded-full border border-white/8">Inactive</span>}
               </div>
-              <div className={`rounded-xl border border-white/8 p-3 ${!PAYMENT_ACTIVE ? 'opacity-60 pointer-events-none' : ''}`} style={{ background: 'rgba(255,255,255,0.03)' }}>
+              <div className={`rounded-xl border border-white/8 p-3`} style={{ background: 'rgba(255,255,255,0.03)' }}>
                 <p className="text-[11px] text-white/70 mb-1">
                   Deduct <span className="font-bold text-white">{creationFee.toLocaleString()} birr</span> from wallet?
-                  {selectedStone.extraFee ? <span className="text-[9px] text-[#D4AF37] block mt-0.5">Includes +{selectedStone.extraFee} birr Angel Heart premium</span> : null}
                 </p>
                 {wallet && <p className="text-[10px] text-white/40 mb-3">Balance: <span className="text-white/70">{Number(wallet.balance ?? 0).toLocaleString()} {wallet.currency || 'ETB'}</span></p>}
                 <div className="flex gap-2">
                   {(['yes','no'] as const).map(v => (
-                    <button key={v} type="button" onClick={() => setPaymentAgreement(v)} disabled={!PAYMENT_ACTIVE}
+                    <button key={v} type="button" onClick={() => setPaymentAgreement(v)}
                       className={`flex-1 py-2 rounded-xl text-[11px] font-bold transition-colors ${paymentAgreement === v ? (v==='yes'?'bg-[#D4AF37] text-black':'bg-red-600 text-white') : 'bg-white/5 text-white/50 border border-white/8'}`}>
                       {v === 'yes' ? 'Yes, agree' : 'No'}
                     </button>
@@ -462,6 +463,7 @@ export default function CreateMemorialPage() {
                 </div>
               )}
             </section>
+            )}
 
             {/* SECTION 4 — Photos & Headstone Desktop */}
             <section className={`hidden md:block ${card} p-6 space-y-6`}>
@@ -478,11 +480,11 @@ export default function CreateMemorialPage() {
                   <input type="file" accept="image/*" onChange={e => handleSingleFileChange(setProfilePhoto, e)} className="block w-full text-sm text-accent-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent-500/20 file:text-white hover:file:bg-accent-500/30" />
                   {profilePhoto && <p className="text-xs text-accent-400 mt-2">Selected: {profilePhoto.name}</p>}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-accent-300 mb-2">Cover photo</label>
-                  <input type="file" accept="image/*" onChange={e => handleSingleFileChange(setCoverPhoto, e)} className="block w-full text-sm text-accent-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent-500/20 file:text-white hover:file:bg-accent-500/30" />
-                  {coverPhoto && <p className="text-xs text-accent-400 mt-2">Selected: {coverPhoto.name}</p>}
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-accent-300 mb-2">Gallery photos (multiple)</label>
+                <input type="file" accept="image/*" multiple onChange={handleGalleryChange} className="block w-full text-sm text-accent-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent-500/20 file:text-white hover:file:bg-accent-500/30" />
+                {galleryPhotos.length > 0 && <p className="text-xs text-accent-400 mt-2">{galleryPhotos.length} photo(s) selected</p>}
+              </div>
               </div>
               <div className="border-t border-primary-700/60 pt-6 space-y-5">
                 <div className="flex items-end justify-between flex-wrap gap-2">
@@ -529,7 +531,7 @@ export default function CreateMemorialPage() {
                     <button type="button" aria-label="Next stone" onClick={() => { const i = STONE_OPTIONS.findIndex(o=>o.id===headstoneDesign); setHeadstoneDesign(STONE_OPTIONS[(i+1)%STONE_OPTIONS.length].id) }} style={{ position:'absolute', right:16, top:'50%', transform:'translateY(-50%)', zIndex:50, width:44, height:44, borderRadius:'9999px', background:'rgba(255,255,255,0.1)', backdropFilter:'blur(4px)', border:'1px solid rgba(255,255,255,0.2)', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>›</button>
                     <div className="absolute inset-0 pointer-events-none" style={{ background:'radial-gradient(circle at 50% 30%, rgba(212,168,83,0.08) 0%, rgba(0,0,0,0) 60%)' }} />
                     <div className="relative z-10" style={{ transform:'translateY(2px)' }}>
-                      <HeadstonePreview memorial={{ name: previewName, dates: previewDates, image: profilePreviewUrl||'/images.jpg', headstoneDesign }} width={260} height={340} />
+                      <HeadstonePreview memorial={{ name: previewName, dates: previewDates, image: profilePreviewUrl || undefined, headstoneDesign }} width={260} height={340} />
                     </div>
                     {[{ h:'h-16', z:'z-20', size:'120px', brightness:'0.32', blur:'0.5px', ty:'4px' }, { h:'h-14', z:'z-25', size:'135px', brightness:'0.48', blur:'0', ty:'2px' }, { h:'h-11', z:'z-30', size:'150px', brightness:'0.62', blur:'0', ty:'0' }].map((l,i) => (
                       <div key={i} className={`absolute bottom-0 left-0 right-0 ${l.h} pointer-events-none ${l.z}`} style={{ backgroundImage:'url("https://upload.wikimedia.org/wikipedia/commons/1/1a/Grass_01.png")', backgroundRepeat:'repeat-x', backgroundSize:`${l.size} auto`, backgroundPosition:'bottom center', filter:`brightness(${l.brightness}) contrast(1.1) saturate(0.8)${l.blur?` blur(${l.blur})`:''}`, transform:`translateY(${l.ty})` }} />
@@ -537,11 +539,7 @@ export default function CreateMemorialPage() {
                   </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-accent-300 mb-2">Gallery photos (multiple)</label>
-                <input type="file" accept="image/*" multiple onChange={handleGalleryChange} className="block w-full text-sm text-accent-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent-500/20 file:text-white hover:file:bg-accent-500/30" />
-                {galleryPhotos.length > 0 && <p className="text-xs text-accent-400 mt-2">{galleryPhotos.length} photo(s) selected</p>}
-              </div>
+             
             </section>
 
             {/* SECTION 4 — Photos & Headstone Mobile */}
@@ -577,10 +575,7 @@ export default function CreateMemorialPage() {
                             <img src={opt.src} alt={opt.label} className="h-12 object-contain" />
                           </div>
                           <p className="text-[8px] font-semibold text-white text-center leading-tight line-clamp-1">{opt.label}</p>
-                          <p className="text-[7px] text-[#D4AF37] text-center mt-0.5">
-                            {opt.price.toLocaleString()} br
-                            {opt.extraFee ? <span className="block">+{opt.extraFee}</span> : null}
-                          </p>
+                          <p className="text-[7px] text-[#D4AF37] text-center mt-0.5">Free</p>
                         </button>
                       )
                     })}
@@ -593,7 +588,7 @@ export default function CreateMemorialPage() {
                   <button type="button" onClick={() => { const i=STONE_OPTIONS.findIndex(o=>o.id===headstoneDesign); setHeadstoneDesign(STONE_OPTIONS[(i-1+STONE_OPTIONS.length)%STONE_OPTIONS.length].id) }} className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center text-white text-lg" style={{ background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.15)' }}>‹</button>
                   <button type="button" onClick={() => { const i=STONE_OPTIONS.findIndex(o=>o.id===headstoneDesign); setHeadstoneDesign(STONE_OPTIONS[(i+1)%STONE_OPTIONS.length].id) }} className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center text-white text-lg" style={{ background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.15)' }}>›</button>
                   <div className="relative z-10 scale-[0.62] origin-bottom mb-1">
-                    <HeadstonePreview memorial={{ name: previewName, dates: previewDates, image: profilePreviewUrl||'/images.jpg', headstoneDesign }} width={260} height={340} />
+                    <HeadstonePreview memorial={{ name: previewName, dates: previewDates, image: profilePreviewUrl || undefined, headstoneDesign }} width={260} height={340} />
                   </div>
                   {[{ h:'32px', size:'90px', brightness:'0.45' }, { h:'24px', size:'105px', brightness:'0.6' }].map((l,i) => (
                     <div key={i} className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{ height:l.h, backgroundImage:'url("https://upload.wikimedia.org/wikipedia/commons/1/1a/Grass_01.png")', backgroundRepeat:'repeat-x', backgroundSize:`${l.size} auto`, backgroundPosition:'bottom center', filter:`brightness(${l.brightness}) saturate(0.8)`, zIndex:20+i }} />
@@ -620,7 +615,11 @@ export default function CreateMemorialPage() {
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-accent-300 mb-2">Funeral date</label>
-                  <input type="date" name="funeralDate" value={formData.funeralDate} onChange={handleInputChange} className={inpDesktop} />
+                  <input
+                    type="date" name="funeralDate" value={formData.funeralDate} onChange={handleInputChange}
+                    min={formData.dateOfDeath || undefined}
+                    className={`${inpDesktop} ${dateError ? 'border-red-400 focus:ring-red-400' : ''}`}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-accent-300 mb-2">Funeral time</label>
@@ -631,6 +630,7 @@ export default function CreateMemorialPage() {
                   <input type="url" name="googleMapsLink" value={formData.googleMapsLink} onChange={handleInputChange} className={inpDesktop} placeholder="https://maps.app.goo.gl/..." />
                 </div>
               </div>
+              <DateErrorBanner />
               <div>
                 <label className="block text-sm font-medium text-accent-300 mb-2">Ceremony location &amp; reception</label>
                 <textarea name="funeralLocation" value={formData.funeralLocation} onChange={handleInputChange} rows={3} className={`${inpDesktop} rounded-2xl`} placeholder="Church, cemetery, reception venue, etc." />
@@ -651,13 +651,18 @@ export default function CreateMemorialPage() {
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block text-[10px] font-semibold text-accent-400 mb-1">Funeral date</label>
-                  <input type="date" name="funeralDate" value={formData.funeralDate} onChange={handleInputChange} className={inp} />
+                  <input
+                    type="date" name="funeralDate" value={formData.funeralDate} onChange={handleInputChange}
+                    min={formData.dateOfDeath || undefined}
+                    className={`${inp} ${dateError ? 'border-red-400' : ''}`}
+                  />
                 </div>
                 <div>
                   <label className="block text-[10px] font-semibold text-accent-400 mb-1">Funeral time</label>
                   <input type="time" name="funeralTime" value={formData.funeralTime} onChange={handleInputChange} className={inp} />
                 </div>
               </div>
+              <DateErrorBanner />
               <div>
                 <label className="block text-[10px] font-semibold text-accent-400 mb-1">Google Maps link</label>
                 <input type="url" name="googleMapsLink" value={formData.googleMapsLink} onChange={handleInputChange} className={inp} placeholder="https://maps.app.goo.gl/..." />

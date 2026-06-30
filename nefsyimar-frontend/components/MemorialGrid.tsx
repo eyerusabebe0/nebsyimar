@@ -7,16 +7,7 @@ import { useEffect, useState } from 'react'
 import { Heart, Users } from 'lucide-react'
 import api from '@/lib/api'
 import { HeadstonePreview } from './HeadstoneMemorial'
-
-type HeadstoneDesignId =
-  | 'stone_1'
-  | 'stone_2'
-  | 'stone_3'
-  | 'stone_4'
-  | 'stone_6'
-  | 'stone_7'
-  | 'stone_8'
-  | 'stone_9'
+import type { HeadstoneDesignId } from './HeadstoneMemorial'
 
 interface ApiMemorial {
   memorial_id: string
@@ -38,20 +29,21 @@ const VALID_HEADSTONE_DESIGNS = new Set([
   'stone_3',
   'stone_4',
   'stone_6',
-  'stone_7',
   'stone_8',
-  'stone_9'
+  'stone_9',
+  'stone_10'
 ])
 
 // stone_9's artwork renders larger than its box, so we shrink just this design
 // to keep it from bleeding outside its sky.png card
-const STONE9_SHRINK_FACTOR = 0.72
+// reduced shrink to better match create preview sizing
+const STONE9_SHRINK_FACTOR = 0.88
 
 const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api/v1'
 const API_ORIGIN = RAW_API_URL.replace(/\/api\/v1\/?$/, '')
 
 function resolveMemorialImage(path?: string | null) {
-  if (!path) return '/images.jpg'
+  if (!path) return undefined
   if (path.startsWith('http://') || path.startsWith('https://')) return path
   if (path.startsWith('/uploads')) return `${API_ORIGIN}${path}`
   return path
@@ -153,26 +145,19 @@ export default function MemorialGrid({ searchTerm = '' }: MemorialGridProps) {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.10),transparent_40%)] pointer-events-none" />
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-950/95 via-transparent to-transparent pointer-events-none" />
           <div
-            className="relative aspect-[4/5] overflow-hidden flex items-center justify-center"
+            className="relative aspect-[11/15] overflow-visible flex items-center justify-center"
             style={{
               backgroundImage: "url('/sky.png')",
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
           >
-            <div
-              style={{
-                transform: isStone9 ? `scale(${STONE9_SHRINK_FACTOR})` : undefined,
-                transformOrigin: 'center bottom',
-              }}
-            >
-              <HeadstonePreview
-                memorial={{ name: memorial.deceased_name, dates, image, headstoneDesign }}
-                width={220}
-                height={300}
-                className="pointer-events-none"
-              />
-            </div>
+            <HeadstonePreview
+              memorial={{ name: memorial.deceased_name, dates, image, headstoneDesign }}
+              width={220}
+              height={300}
+              className="pointer-events-none"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-primary-950/30 to-transparent" />
             <div className="absolute left-4 right-4 bottom-4">
               
@@ -212,26 +197,19 @@ export default function MemorialGrid({ searchTerm = '' }: MemorialGridProps) {
         className="flex flex-col items-center gap-1.5"
       >
         <div
-          className="relative w-full rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center"
+          className="relative w-full rounded-2xl overflow-visible border border-white/10 flex items-center justify-center"
           style={{
             backgroundImage: "url('/sky.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         >
-          <div
-            style={{
-              transform: isStone9 ? `scale(${STONE9_SHRINK_FACTOR})` : undefined,
-              transformOrigin: 'center bottom',
-            }}
-          >
-            <HeadstonePreview
-              memorial={{ name: memorial.deceased_name, dates, image, headstoneDesign }}
-              width={84}
-              height={110}
-              className="mx-auto w-full"
-            />
-          </div>
+          <HeadstonePreview
+            memorial={{ name: memorial.deceased_name, dates, image, headstoneDesign }}
+            width={84}
+            height={110}
+            className="mx-auto w-full"
+          />
         </div>
         <p
           className="text-center text-white font-medium leading-tight line-clamp-2 w-full"

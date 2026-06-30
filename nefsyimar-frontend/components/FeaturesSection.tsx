@@ -40,7 +40,7 @@ export default function FeaturesSection() {
             What We Offer
           </p>
           <h2 className="text-xl md:text-4xl font-bold text-white font-display mb-3 md:mb-4">
-            ,<br className="md:hidden" /> Supporting Hearts
+            <br className="md:hidden" /> Supporting Hearts
           </h2>
           <div className="flex items-center justify-center gap-2 mt-3 md:mt-4">
             <div className="h-px w-6 md:w-8 bg-accent-400/50" />
@@ -63,78 +63,51 @@ export default function FeaturesSection() {
         </div>
 
         {/* ── MOBILE: premium mixed layout ── */}
-        <div className="md:hidden flex flex-col gap-2.5">
+      <div className="md:hidden grid grid-cols-2 gap-2.5">
+  
+  {/* Card 1 */}
+  <div className="relative rounded-2xl overflow-hidden border-t-2 border-[#D4AF37]/30 bg-white/5 p-4">
+    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center mb-3">
+      <FileText className="w-5 h-5 text-[#D4AF37]" />
+    </div>
+    <span className="text-[9px] font-black text-[#D4AF37]/50 tracking-widest block mb-0.5">01</span>
+    <h3 className="text-[12px] font-bold text-white mb-1">Create Memorial</h3>
+    <p className="text-[10px] text-white/50 leading-snug">Build a beautiful page to honor their legacy.</p>
+  </div>
 
-          {/* Card 1 — full width hero card */}
-          <div
-            className="relative rounded-2xl overflow-hidden border-t-2 border-[#D4AF37]/30 bg-white/5"
-            style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.07) 0%, rgba(255,255,255,0.03) 100%)' }}
-          >
-            <div className="flex items-center gap-4 p-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-[#D4AF37]" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-[9px] font-black text-[#D4AF37]/50 tracking-widest">01</span>
-                  <h3 className="text-[13px] font-bold text-white">Create Memorial</h3>
-                </div>
-                <p className="text-[10.5px] text-white/50 leading-snug">
-                  Build a beautiful memorial page to honor your loved one's life and legacy.
-                </p>
-              </div>
-            </div>
-            {/* decorative gold corner */}
-            <div className="absolute top-0 right-0 w-16 h-16 opacity-5"
-              style={{ background: 'radial-gradient(circle at top right, #D4AF37, transparent 70%)' }} />
-          </div>
+  {/* Card 2 */}
+  <div className="relative rounded-2xl overflow-hidden border-t-2 border-[#D4AF37]/20 bg-white/5 p-4">
+    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center mb-3">
+      {/* Replace with your Icon */}
+      <div className="w-4 h-4 bg-[#D4AF37]/50 rounded-full" /> 
+    </div>
+    <span className="text-[9px] font-black text-[#D4AF37]/50 tracking-widest block mb-0.5">02</span>
+    <h3 className="text-[12px] font-bold text-white mb-1">{features[1]?.title}</h3>
+    <p className="text-[10px] text-white/50 leading-snug">{features[1]?.description}</p>
+  </div>
 
-          {/* Cards 2 & 3 — side by side */}
-          <div className="grid grid-cols-2 gap-2.5">
-            {[features[1], features[2]].map((f, i) => (
-              <div
-                key={i}
-                className="relative rounded-2xl overflow-hidden border-t-2 border-[#D4AF37]/20 p-3.5"
-                style={{ background: 'linear-gradient(160deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)' }}
-              >
-                <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/15 flex items-center justify-center mb-3">
-                  <f.icon className="w-4 h-4 text-[#D4AF37]" />
-                </div>
-                <span className="text-[8.5px] font-black text-[#D4AF37]/40 tracking-widest block mb-0.5">
-                  {i === 0 ? '02' : '03'}
-                </span>
-                <h3 className="text-[11.5px] font-bold text-white mb-1 leading-tight">{f.title}</h3>
-                <p className="text-[9.5px] text-white/45 leading-snug">{f.description}</p>
-              </div>
-            ))}
-          </div>
+  {/* Card 3 */}
+  <div className="relative rounded-2xl overflow-hidden border-t-2 border-[#D4AF37]/20 bg-white/5 p-4">
+    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center mb-3">
+      {/* Replace with your Icon */}
+      <div className="w-4 h-4 bg-[#D4AF37]/50 rounded-full" />
+    </div>
+    <span className="text-[9px] font-black text-[#D4AF37]/50 tracking-widest block mb-0.5">03</span>
+    <h3 className="text-[12px] font-bold text-white mb-1">{features[2]?.title}</h3>
+    <p className="text-[10px] text-white/50 leading-snug">{features[2]?.description}</p>
+  </div>
 
-          {/* Card 4 — full width, different accent treatment */}
-          <div
-            className="relative rounded-2xl overflow-hidden border border-[#D4AF37]/15 p-4"
-            style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(212,175,55,0.05) 100%)' }}
-          >
-            <div className="flex items-center gap-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center">
-                <Heart className="w-4.5 h-4.5 text-[#D4AF37]" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-[9px] font-black text-[#D4AF37]/50 tracking-widest">04</span>
-                  <h3 className="text-[13px] font-bold text-white">Support & Comfort</h3>
-                </div>
-                <p className="text-[10.5px] text-white/50 leading-snug">
-                  Find resources and support to help you through the journey of grief.
-                </p>
-              </div>
-            </div>
-            {/* gold pill tag */}
-            <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20">
-              <span className="text-[8px] font-bold text-[#D4AF37] tracking-wider uppercase">Always here</span>
-            </div>
-          </div>
+  {/* Card 4 */}
+  <div className="relative rounded-2xl overflow-hidden border-t-2 border-[#D4AF37]/20 bg-white/5 p-4">
+    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center mb-3">
+      <Heart className="w-4.5 h-4.5 text-[#D4AF37]" />
+    </div>
+    <span className="text-[9px] font-black text-[#D4AF37]/50 tracking-widest block mb-0.5">04</span>
+    <h3 className="text-[12px] font-bold text-white mb-1">Support</h3>
+    <p className="text-[10px] text-white/50 leading-snug">Find resources to help through grief.</p>
+  </div>
 
-        </div>
+</div>
       </div>
     </section>
   )

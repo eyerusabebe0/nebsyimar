@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { User } from 'lucide-react'
 
 export type HeadstoneDesignId =
   | 'stone_1' | 'stone_2' | 'stone_3' | 'stone_4'
-  | 'stone_6' | 'stone_7' | 'stone_8' | 'stone_9'
+  | 'stone_6' | 'stone_8' | 'stone_9' | 'stone_10'
 
 export interface HeadstoneStoneMemorial {
   name?: string
@@ -26,17 +27,21 @@ type LayoutConfig = {
   nameFontSize: number
   datesFontSize: number
   zoomScale: number
+  textAlign?: 'left' | 'center' | 'right'
 }
 
+// photoLeftPct/textPanel left are both anchored with translateX(-50%),
+// so true center is 50. Where the stone artwork's carved circle isn't
+// dead-center, we nudge slightly — kept as close to 50 as the art allows.
 const STONE_LAYOUTS: Record<HeadstoneDesignId, LayoutConfig> = {
-  stone_1: { photoShape: 'circle', photoTopPct: 9, photoSizePct: 28, photoLeftPct: 45, textPanelTopPct: 40, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05 },
-  stone_2: { photoShape: 'circle', photoTopPct: 11, photoSizePct: 35, photoLeftPct: 50, textPanelTopPct: 48, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05 },
-  stone_3: { photoShape: 'circle', photoTopPct: 12, photoSizePct: 35, photoLeftPct: 50, textPanelTopPct: 48, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05 },
-  stone_4: { photoShape: 'circle', photoTopPct: 11, photoSizePct: 40, photoLeftPct: 52, textPanelTopPct: 52, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05 },
-  stone_6: { photoShape: 'circle', photoTopPct: 13, photoSizePct: 35, photoLeftPct: 50, textPanelTopPct: 50, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05 },
-  stone_7: { photoShape: 'circle', photoTopPct: 20, photoSizePct: 25, photoLeftPct: 53, textPanelTopPct: 47, textWidthPct: 45, nameFontSize: 12, datesFontSize: 10, zoomScale: 1.3 },
-  stone_8: { photoShape: 'circle', photoTopPct: 11, photoSizePct: 40, photoLeftPct: 51, textPanelTopPct: 47, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05 },
-  stone_9: { photoShape: 'circle', photoTopPct: 10, photoSizePct: 30, photoLeftPct: 46, textPanelTopPct: 40, textWidthPct: 45, nameFontSize: 15, datesFontSize: 15, zoomScale: 1.05 },
+  stone_1: { photoShape: 'circle', photoTopPct: 9, photoSizePct: 28, photoLeftPct: 45, textPanelTopPct: 40, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05, textAlign: 'center' },
+  stone_2: { photoShape: 'circle', photoTopPct: 11, photoSizePct: 35, photoLeftPct: 50, textPanelTopPct: 48, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05, textAlign: 'center' },
+  stone_3: { photoShape: 'circle', photoTopPct: 12, photoSizePct: 35, photoLeftPct: 50, textPanelTopPct: 48, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05, textAlign: 'center' },
+  stone_4: { photoShape: 'circle', photoTopPct: 11, photoSizePct: 40, photoLeftPct: 51, textPanelTopPct: 50, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05, textAlign: 'center' },
+  stone_6: { photoShape: 'circle', photoTopPct: 13, photoSizePct: 36, photoLeftPct: 50, textPanelTopPct: 50, textWidthPct: 45, nameFontSize: 17, datesFontSize: 15, zoomScale: 1.05, textAlign: 'center' },
+  stone_8: { photoShape: 'circle', photoTopPct: 29, photoSizePct: 25, photoLeftPct: 53, textPanelTopPct: 50, textWidthPct: 45, nameFontSize: 15, datesFontSize: 13, zoomScale: 1.2, textAlign: 'center' },
+  stone_9: { photoShape: 'circle', photoTopPct: 10, photoSizePct: 30, photoLeftPct: 46, textPanelTopPct: 40, textWidthPct: 45, nameFontSize: 15, datesFontSize: 15, zoomScale: 1.05, textAlign: 'center' },
+  stone_10: { photoShape: 'circle', photoTopPct: 22, photoSizePct: 20, photoLeftPct: 58, textPanelTopPct: 43, textWidthPct: 46, nameFontSize: 16, datesFontSize: 14, zoomScale: 2.7, textAlign: 'right' },
 }
 
 const STONE_META: Record<HeadstoneDesignId, { src: string }> = {
@@ -45,12 +50,12 @@ const STONE_META: Record<HeadstoneDesignId, { src: string }> = {
   stone_3: { src: '/STONES/stone_3.png' },
   stone_4: { src: '/STONES/stone_4.png' },
   stone_6: { src: '/STONES/stone_6.png' },
-  stone_7: { src: '/STONES/stone_7.png' },
   stone_8: { src: '/STONES/stone_8.png' },
   stone_9: { src: '/STONES/stone_9.png' },
+  stone_10: { src: '/STONES/stone_10.png' },
 }
 
-const LIGHT_FACE_STONES: HeadstoneDesignId[] = ['stone_2', 'stone_4', 'stone_6', 'stone_7', 'stone_8', 'stone_9']
+const LIGHT_FACE_STONES: HeadstoneDesignId[] = ['stone_2', 'stone_4', 'stone_6', 'stone_8', 'stone_9', 'stone_10']
 
 const REFERENCE_WIDTH = 320
 
@@ -67,18 +72,20 @@ export function HeadstonePreview({
   className = '',
   width,
   height,
+  zoomScaleOverride,
 }: {
   memorial?: HeadstoneStoneMemorial
   selectedDesignId?: HeadstoneDesignId
   className?: string
   width?: number
   height?: number
+  zoomScaleOverride?: number
 }) {
   const activeDesignId = (selectedDesignId || memorial?.headstoneDesign || 'stone_2') as HeadstoneDesignId
   const activeStone = STONE_META[activeDesignId] || STONE_META.stone_2
   const layout = STONE_LAYOUTS[activeDesignId] || STONE_LAYOUTS.stone_2
   const isLightFace = LIGHT_FACE_STONES.includes(activeDesignId)
-const zoomScale = layout.zoomScale
+  const zoomScale = zoomScaleOverride ?? layout.zoomScale
   const [autoSize, setAutoSize] = useState({ width: 320, height: 384 })
 
   useEffect(() => {
@@ -104,13 +111,25 @@ const zoomScale = layout.zoomScale
   const name = memorial?.name || 'In Loving Memory'
   const nameScale = getNameScale(name)
 
-  // FIX: Sharper, high-contrast shadows to ensure visibility on all stone colors
-  const engravedTextShadow = isLightFace
-    ? '0.5px 0.5px 0px rgba(0,0,0,0.4), -0.5px -0.5px 0px rgba(255,255,255,0.7)'
-    : '0.5px 0.5px 0px rgba(0,0,0,0.9), -0.5px -0.5px 0px rgba(255,255,255,0.1)'
+  // ── Carved-letter look ───────────────────────────────────────────
+  // Instead of a flat, solid-colored label sitting on top of the stone,
+  // the text uses a translucent ink so the stone's own texture still
+  // shows through, plus a tight double shadow (dark groove + light
+  // catch) to read as cut into the surface rather than printed on it.
+  const isStone10 = activeDesignId === 'stone_10'
+  const textColor = isStone10
+    ? 'rgba(255, 255, 255, 0.98)'
+    : isLightFace
+      ? 'rgba(32, 30, 26, 0.82)'
+      : 'rgba(228, 220, 196, 0.92)'
+  const textBlendMode: React.CSSProperties['mixBlendMode'] = isStone10 ? 'normal' : isLightFace ? 'multiply' : 'normal'
+  const textStroke = isStone10 ? '0.35px rgba(0, 0, 0, 0.6)' : undefined
 
-  // FIX: Brighter text colors to ensure readability on dark stones
-  const textColor = isLightFace ? '#2a2a2a' : '#f0eada'
+  const engravedTextShadow = isStone10
+    ? '0 0 10px rgba(0,0,0,0.65), 0 1px 2px rgba(0,0,0,0.75), 0 0 2px rgba(255,255,255,0.18)'
+    : isLightFace
+      ? '0.6px 0.6px 0px rgba(255,255,255,0.55), -0.6px -0.6px 0.6px rgba(0,0,0,0.45), 0 1px 1px rgba(0,0,0,0.15)'
+      : '-0.6px -0.6px 0.6px rgba(0,0,0,0.85), 0.6px 0.6px 0px rgba(255,255,255,0.10), 0 0 2px rgba(0,0,0,0.4)'
 
   const photoHeightPct = layout.photoHeightPct ?? layout.photoSizePct
   const isRect = layout.photoShape === 'rect'
@@ -127,18 +146,19 @@ const zoomScale = layout.zoomScale
         className="relative z-20 flex flex-col items-center bg-transparent"
         style={{ width: '100%', height: '100%', paddingTop: finalHeight * 0.10 }}
       >
-  
-<img
-  src={activeStone.src}
-  alt="Headstone"
-  className="h-full w-full object-contain"
-  style={{ 
-    transform: `scale(${layout.zoomScale})`,
-    transformOrigin: 'center center' // Ensures it zooms from the middle
-  }}
-/>
 
-        {/* Photo Container */}
+        <img
+          src={activeStone.src}
+          alt="Headstone"
+          className="h-full w-full object-contain"
+          style={{
+            transform: `scale(${zoomScale})`,
+            transformOrigin: 'center center' // Ensures it zooms from the middle
+          }}
+        />
+
+        {/* Photo Container — anchored to true center (50%) unless the
+            stone artwork's carved circle requires a slight nudge */}
         <div
           className={`absolute overflow-hidden ${isRect ? 'rounded-sm' : 'rounded-full'}`}
           style={{
@@ -153,7 +173,7 @@ const zoomScale = layout.zoomScale
             zIndex: 30,
           }}
         >
-          {memorial?.image && (
+          {memorial?.image ? (
             <img
               src={memorial.image}
               className="w-full h-full object-cover"
@@ -161,12 +181,36 @@ const zoomScale = layout.zoomScale
               // Added slight grayscale/contrast to help it blend with stone texture
               style={{ filter: 'contrast(1.05) brightness(0.9) grayscale(0.2)' }}
             />
+          ) : (
+            <div
+              className="relative flex h-full w-full items-center justify-center"
+              style={{
+                background: 'transparent',
+              }}
+            >
+              <User
+                className="h-10 w-10"
+                style={{
+                  color: isLightFace ? 'rgba(45,40,30,0.85)' : 'rgba(215,200,170,0.8)',
+                  filter: isLightFace
+                    ? 'drop-shadow(1px 1px 0px rgba(255,255,255,0.5)) drop-shadow(-1px -1px 0px rgba(0,0,0,0.35))'
+                    : 'drop-shadow(-1px -1px 0px rgba(0,0,0,0.7)) drop-shadow(1px 1px 0px rgba(255,255,255,0.12))',
+                }}
+                strokeWidth={2}
+              />
+              <span className="sr-only">No memorial photo</span>
+            </div>
           )}
-          {/* Enhanced depth overlay */}
-          <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+          {/* Carved ring border — double inset shadow mimics chiseled groove */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            boxShadow: isLightFace
+              ? 'inset 0 3px 8px rgba(0,0,0,0.45), inset 0 -2px 4px rgba(255,255,255,0.25), inset 0 0 0 3px rgba(0,0,0,0.12), inset 0 0 0 4px rgba(255,255,255,0.15)'
+              : 'inset 0 3px 10px rgba(0,0,0,0.7), inset 0 -2px 4px rgba(255,255,255,0.06), inset 0 0 0 3px rgba(0,0,0,0.3), inset 0 0 0 4px rgba(255,255,255,0.05)',
+            borderRadius: 'inherit',
+          }} />
         </div>
 
-        {/* Engraved name + dates */}
+        {/* Engraved name + dates — perfectly centered box, carved text effect */}
         <div
           className="absolute text-center font-serif font-bold px-1"
           style={{
@@ -175,6 +219,7 @@ const zoomScale = layout.zoomScale
             transform: 'translateX(-50%)',
             width: `${layout.textWidthPct}%`,
             color: textColor,
+            mixBlendMode: textBlendMode,
             zIndex: 30,
           }}
         >
@@ -183,6 +228,9 @@ const zoomScale = layout.zoomScale
             style={{
               fontSize: `${layout.nameFontSize * scaleFactor * nameScale}px`,
               textShadow: engravedTextShadow,
+              textAlign: layout.textAlign ?? 'center',
+              letterSpacing: '0.4px',
+              WebkitTextStroke: textStroke,
             }}
           >
             {name}
@@ -192,6 +240,9 @@ const zoomScale = layout.zoomScale
             style={{
               fontSize: `${layout.datesFontSize * scaleFactor * Math.max(nameScale, 0.8)}px`,
               textShadow: engravedTextShadow,
+              textAlign: layout.textAlign ?? 'center',
+              letterSpacing: '0.3px',
+              WebkitTextStroke: textStroke,
             }}
           >
             {memorial?.dates}

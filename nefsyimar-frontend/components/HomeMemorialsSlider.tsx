@@ -6,15 +6,15 @@ import { HeadstonePreview } from './HeadstoneMemorial'
 import api from '@/lib/api'
 
 // --- CONSTANTS ---
-const previewStoneIds = ['stone_2', 'stone_3', 'stone_4', 'stone_6', 'stone_7', 'stone_8', 'stone_9'] as const
+const previewStoneIds = ['stone_2', 'stone_3', 'stone_4', 'stone_6', 'stone_8', 'stone_9', 'stone_10'] as const
 
 const FALLBACK_MEMORIALS = [
   { id: 'demo-1', name: 'Haile Selassie', years: '1892 – 1975', place: 'Ethiopia', image: '/haile.jpg' },
   { id: 'demo-2', name: 'Meron Tesfaye', years: '1955 – 2020', place: 'Addis Ababa', image: '/meron.jpg' },
   { id: 'demo-3', name: 'Dawit Bekele', years: '1962 – 2018', place: 'Bahir Dar', image: '/dawit.jpg' },
   { id: 'demo-4', name: 'Doron Asfaw', years: '1948 – 2021', place: 'Mekelle', image: '/doron.webp' },
-  { id: 'demo-5', name: 'Beloved Memory', years: '1940 – 2019', place: 'Dire Dawa', image: '/images.jpg' },
-  { id: 'demo-6', name: 'In Loving Memory', years: '1958 – 2022', place: 'Gondar', image: '/images1.jpg' },
+  { id: 'demo-5', name: 'Beloved Memory', years: '1940 – 2019', place: 'Dire Dawa' },
+  { id: 'demo-6', name: 'In Loving Memory', years: '1958 – 2022', place: 'Gondar' },
 ]
 
 interface ApiMemorial {
@@ -31,7 +31,7 @@ interface MemorialCard {
   name: string
   years: string
   place: string
-  image: string
+  image?: string
 }
 
 export default function HomeMemorialsSlider() {
@@ -42,7 +42,7 @@ export default function HomeMemorialsSlider() {
   const API_ORIGIN = RAW_API_URL.replace(/\/api\/v1\/?$/, '')
 
   const resolveImage = (path?: string | null) => {
-    if (!path) return '/images.jpg'
+    if (!path) return undefined
     if (path.startsWith('http')) return path
     if (path.startsWith('/uploads')) return `${API_ORIGIN}${path}`
     return path

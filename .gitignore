@@ -2,3 +2,16 @@ node_modules/
 nefsyimar-frontend/node_modules/
 nefsyimar-backend/node_modules/
 nefsyimar-frontend/.next/
+# Environment variables
+.env
+.env*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Other common ignores
+.DS_Store
+dist/
+build/

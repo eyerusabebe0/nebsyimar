@@ -148,6 +148,10 @@ export const appealsApi = {
     }),
 };
 
+export const repatriationApi = {
+  submitRequest: (formData: FormData) => api.post('/repatriation', formData),
+};
+
 // Admin API methods
 export const adminApi = {
   getOverviewStats: () =>
@@ -235,6 +239,11 @@ export const adminApi = {
 
   verifyVendor: (vendorId: string) =>
     api.post(`/admin/vendors/${vendorId}/verify`),
+
+  getRepatriationSubmissions: (page: number = 1, limit: number = 20) =>
+    api.get('/admin/repatriation-submissions', {
+      params: { page, limit },
+    }),
 
   rejectVendor: (vendorId: string, reason: string) =>
     api.post(`/admin/vendors/${vendorId}/reject`, { reason }),

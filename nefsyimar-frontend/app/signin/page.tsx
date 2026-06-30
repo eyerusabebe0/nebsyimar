@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, Heart, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import TestCredentials from '@/components/TestCredentials'
@@ -10,7 +10,9 @@ import { authApi } from '@/lib/api'
 
 export default function SignInPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { login } = useAuth()
+  const isRepatriationFlow = searchParams?.get('redirect') === '/repatriation'
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -31,15 +33,18 @@ export default function SignInPage() {
           const statusResponse = await authApi.getAuthStatus()
           const role = statusResponse.data?.data?.user?.role
 
+          const redirectTo = searchParams?.get('redirect')
+          const safeRedirect = redirectTo && redirectTo.startsWith('/') ? redirectTo : '/dashboard'
+
           if (role === 'Administrator') {
             router.push('/admin')
           } else if (role === 'Vendor') {
             router.push('/vendor')
           } else {
-            router.push('/dashboard')
+            router.push(safeRedirect)
           }
         } catch {
-          router.push('/dashboard')
+          router.push(searchParams?.get('redirect') && searchParams.get('redirect')?.startsWith('/') ? searchParams.get('redirect')! : '/dashboard')
         }
       } else {
         setError('Invalid email or password')
@@ -80,6 +85,16 @@ export default function SignInPage() {
           {error && (
             <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6">
               <p className="text-red-300 text-sm">{error}</p>
+            </div>
+          )}
+
+          {isRepatriationFlow && (
+            <div className="mb-6 rounded-xl border border-accent-500/25 bg-accent-500/10 p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-accent-300/80">Repatriation & Funeral Services</p>
+              <h2 className="mt-2 text-lg font-semibold text-white">Dignified Repatriation & Funeral Services</h2>
+              <p className="mt-2 text-sm leading-relaxed text-accent-100/80">
+                Body shipping means bringing a beloved one back to Ethiopia from another country with dignity, care, and legal support.
+              </p>
             </div>
           )}
 

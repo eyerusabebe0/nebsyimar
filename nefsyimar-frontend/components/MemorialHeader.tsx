@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Bluetooth, Calendar, Copy, Instagram, MapPin, Share2 } from 'lucide-react'
+import { Bluetooth, Calendar, Copy, Instagram, MapPin, Send, Share2 } from 'lucide-react'
 import { SiWhatsapp } from 'react-icons/si'
 import { HeadstoneDesignId, HeadstonePreview } from './HeadstoneMemorial'
 
@@ -15,7 +15,7 @@ interface Memorial {
 }
 
 const ALLOWED_HEADSTONE_DESIGNS: HeadstoneDesignId[] = [
-  'stone_1', 'stone_2', 'stone_3', 'stone_4', 'stone_6', 'stone_7', 'stone_8', 'stone_9'
+  'stone_1', 'stone_2', 'stone_3', 'stone_4', 'stone_6', 'stone_8', 'stone_9', 'stone_10'
 ]
 
 function normalizeHeadstoneDesign(design?: string): HeadstoneDesignId | undefined {
@@ -59,6 +59,12 @@ export default function MemorialHeader({ memorial }: MemorialHeaderProps) {
     setShareOpen(false)
   }
 
+  const handleTelegram = () => {
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`
+    window.open(telegramUrl, '_blank')
+    setShareOpen(false)
+  }
+
   const handleBluetoothShare = async () => {
     if (navigator.share) {
       try {
@@ -92,54 +98,51 @@ export default function MemorialHeader({ memorial }: MemorialHeaderProps) {
           />
         )}
         
-        <div className="absolute top-3 left-3 z-10">
-          <button
-            type="button"
-            onClick={handleToggleShare}
-            className="px-3 py-1.5 bg-black/60 hover:bg-accent-500/95 text-accent-200 hover:text-white rounded-full text-xs uppercase tracking-wider font-semibold flex items-center gap-1.5 transition-all duration-200"
-          >
-            <Share2 className="w-3.5 h-3.5" />
-            Share
-          </button>
-          
-          {shareOpen && (
-            <div className="mt-2 w-56 rounded-2xl bg-slate-950/95 border border-white/10 shadow-2xl backdrop-blur-xl p-3 text-left">
-              <p className="text-xs uppercase tracking-[0.24em] text-accent-400 mb-2">Share via</p>
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className="w-full text-left px-3 py-2 rounded-xl text-sm text-white hover:bg-white/10 transition flex items-center gap-2"
-              >
-                <Copy className="w-4 h-4 text-accent-300" />
-                Copy Link
-              </button>
-              <button
-                type="button"
-                onClick={handleWhatsApp}
-                className="w-full text-left px-3 py-2 rounded-xl text-sm text-white hover:bg-white/10 transition flex items-center gap-2"
-              >
-                <SiWhatsapp className="w-4 h-4 text-green-500" />
-                WhatsApp
-              </button>
-              <button
-                type="button"
-                onClick={handleInstagram}
-                className="w-full text-left px-3 py-2 rounded-xl text-sm text-white hover:bg-white/10 transition flex items-center gap-2"
-              >
-                <Instagram className="w-4 h-4 text-pink-400" />
-                Instagram
-              </button>
-              <button
-                type="button"
-                onClick={handleBluetoothShare}
-                className="w-full text-left px-3 py-2 rounded-xl text-sm text-white hover:bg-white/10 transition flex items-center gap-2"
-              >
-                <Bluetooth className="w-4 h-4 text-cyan-300" />
-                Device Share
-              </button>
-            </div>
-          )}
-        </div>
+  {/* CRITICAL: If the headstone container has 'overflow-hidden' or 'transform', 
+  this 'div' must be moved OUTSIDE that container. 
+*/}
+<div className="absolute top-3 left-3 z-[9999]">
+  <div className="relative">
+    <button
+      type="button"
+      onClick={handleToggleShare}
+      className="px-3 py-1.5 bg-black/60 hover:bg-accent-500/95 text-accent-200 hover:text-white rounded-full text-xs uppercase tracking-wider font-semibold flex items-center gap-1.5 transition-all duration-200"
+    >
+      <Share2 className="w-3.5 h-3.5" />
+      Share
+    </button>
+
+    {shareOpen && (
+      <div 
+        className="fixed md:absolute z-[10000] left-3 md:left-0 mt-2 w-56 rounded-2xl bg-slate-950/95 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-xl p-3 text-left"
+        // Using 'fixed' on mobile ensures it breaks out of ALL parent containers
+        // while 'md:absolute' keeps it positioned relative to the button on desktop.
+      >
+        <p className="text-xs uppercase tracking-[0.24em] text-accent-400 mb-2 px-3">Share via</p>
+
+        <button type="button" onClick={handleCopyLink} className="w-full text-left px-3 py-2 rounded-xl text-sm text-white hover:bg-white/10 transition flex items-center gap-2">
+          <Copy className="w-4 h-4 text-accent-300" /> Copy Link
+        </button>
+
+        <button type="button" onClick={handleWhatsApp} className="w-full text-left px-3 py-2 rounded-xl text-sm text-white hover:bg-white/10 transition flex items-center gap-2">
+          <SiWhatsapp className="w-4 h-4 text-green-500" /> WhatsApp
+        </button>
+
+        <button type="button" onClick={handleTelegram} className="w-full text-left px-3 py-2 rounded-xl text-sm text-white hover:bg-white/10 transition flex items-center gap-2">
+          <Send className="w-4 h-4 text-sky-400" /> Telegram
+        </button>
+
+        <button type="button" onClick={handleInstagram} className="w-full text-left px-3 py-2 rounded-xl text-sm text-white hover:bg-white/10 transition flex items-center gap-2">
+          <Instagram className="w-4 h-4 text-pink-400" /> Instagram
+        </button>
+
+        <button type="button" onClick={handleBluetoothShare} className="w-full text-left px-3 py-2 rounded-xl text-sm text-white hover:bg-white/10 transition flex items-center gap-2">
+          <Bluetooth className="w-4 h-4 text-cyan-300" /> Device Share
+        </button>
+      </div>
+    )}
+  </div>
+</div>
       </div>
 
       <div className="p-6 bg-transparent">

@@ -181,7 +181,7 @@ export default function HomeMarketplaceSlider() {
                       <div className="p-3">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-white font-bold text-base">
-                            {p.price} <span className="text-xs text-accent-400">ETB</span>
+                        
                           </span>
                           <span className="flex items-center gap-1 text-xs text-white font-semibold">
                             <Star className="w-3 h-3 text-amber-400 fill-current" />

@@ -17,7 +17,8 @@ const ALLOWED_HEADSTONE_DESIGNS = new Set([
   'stone_6',
   'stone_7',
   'stone_8',
-  'stone_9'
+  'stone_9',
+  'stone_10'
 ]);
 
 // @desc    Get all public memorials
@@ -429,8 +430,16 @@ const updateMemorial = asyncHandler(async (req, res) => {
     place_of_death,
     cause_of_death,
     visibility,
-    cultural_template
+    cultural_template,
+    headstone_design,
   } = req.body;
+
+  if (headstone_design && !ALLOWED_HEADSTONE_DESIGNS.has(String(headstone_design))) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid headstone design.'
+    });
+  }
 
   const memorial = await Memorial.findByPk(id);
 
@@ -507,6 +516,13 @@ const updateMemorial = asyncHandler(async (req, res) => {
 
   if (requestedGalleryImages !== null || deletedImages.length > 0 || uploadedFiles.gallery_images) {
     updateData.gallery_images = galleryImagesToSave;
+  }
+
+  if (headstone_design) {
+    updateData.memorial_settings = {
+      ...(memorial.memorial_settings || {}),
+      headstone_design: String(headstone_design),
+    };
   }
 
   await memorial.update(updateData);

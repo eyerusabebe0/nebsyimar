@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { Menu, X, LogIn, LogOut, Settings, LayoutDashboard, ChevronDown } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -16,6 +16,7 @@ export default function Navigation() {
   const { user, logout } = useAuth()
   const { totalItems } = useCart()
   const router = useRouter()
+  const pathname = usePathname()
 
   const isAdmin = user?.role === 'Administrator'
   const isVendor = user?.role === 'Vendor'
@@ -67,6 +68,9 @@ export default function Navigation() {
   const dashboardHref = isAdmin ? '/admin' : isVendor ? '/vendor' : '/dashboard'
   const dashboardLabel = isAdmin ? 'Admin Dashboard' : isVendor ? 'Vendor Dashboard' : 'Dashboard'
 
+  const isActive = (href: string) =>
+    pathname === href || (href !== '/' && pathname?.startsWith(href + '/'))
+
   return (
     <>
       <style jsx global>{`
@@ -97,6 +101,14 @@ export default function Navigation() {
           align-items: center;
           justify-content: space-between;
           height: 68px;
+          position: relative;
+        }
+        @media (max-width: 1023px) {
+          .nav-inner {
+            justify-content: center;
+            height: 64px;
+            padding: 0 16px;
+          }
         }
         .nav-logo {
           display: flex;
@@ -105,13 +117,38 @@ export default function Navigation() {
           text-decoration: none;
           flex-shrink: 0;
         }
+        @media (max-width: 1023px) {
+          .nav-logo {
+            gap: 8px;
+          }
+        }
         .nav-logo-img {
           width: 40px;
           height: 40px;
           object-fit: contain;
-          border-radius: 8px;
-          border: 1px solid rgba(212, 175, 55, 0.3);
-          box-shadow: 0 0 12px rgba(212, 175, 55, 0.12);
+        }
+        @media (max-width: 1023px) {
+          .nav-logo-img {
+            width: 42px;
+            height: 42px;
+          }
+        }
+        .nav-brand-name {
+          font-size: 15px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          background: linear-gradient(135deg, #D4AF37 0%, #F5D769 45%, #D4AF37 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          font-family: inherit;
+          line-height: 1;
+        }
+        @media (min-width: 1024px) {
+          .nav-brand-name {
+            display: none;
+          }
         }
         .nav-links {
           display: none;
@@ -123,12 +160,12 @@ export default function Navigation() {
         }
         .nav-link, .nav-link-btn {
           position: relative;
-          padding: 6px 14px;
-          font-size: 11.5px;
-          font-weight: 600;
-          letter-spacing: 0.08em;
+          padding: 6px 12px;
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: 0.06em;
           text-transform: uppercase;
-          color: rgba(220, 220, 230, 0.85);
+          color: rgba(210, 210, 222, 0.62);
           text-decoration: none;
           border-radius: 6px;
           transition: color 0.2s, background 0.2s;
@@ -143,7 +180,7 @@ export default function Navigation() {
           bottom: 2px;
           left: 50%;
           transform: translateX(-50%) scaleX(0);
-          width: calc(100% - 28px);
+          width: calc(100% - 24px);
           height: 1.5px;
           background: linear-gradient(90deg, #D4AF37, #F5D769);
           border-radius: 2px;
@@ -154,6 +191,13 @@ export default function Navigation() {
           background: rgba(255, 255, 255, 0.05);
         }
         .nav-link:hover::after, .nav-link-btn:hover::after {
+          transform: translateX(-50%) scaleX(1);
+        }
+        .nav-link.active, .nav-link-btn.active {
+          color: #ffffff;
+          font-weight: 600;
+        }
+        .nav-link.active::after, .nav-link-btn.active::after {
           transform: translateX(-50%) scaleX(1);
         }
         .nav-actions {
@@ -227,18 +271,35 @@ export default function Navigation() {
           border-color: rgba(212, 175, 55, 0.35);
         }
         .user-avatar {
-          width: 32px;
-          height: 32px;
+          width: 34px;
+          height: 34px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #D4AF37, #B8962E);
+          background: radial-gradient(ellipse at 30% 20%, #c9a84c 0%, #a8872a 40%, #7a6320 80%, #5c4a18 100%);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 13px;
-          font-weight: 700;
-          color: #0a0a12;
-          border: 1.5px solid rgba(212, 175, 55, 0.6);
+          font-size: 14px;
+          font-weight: 800;
+          color: #1a1408;
+          text-shadow: 0 1px 0 rgba(212, 175, 55, 0.5), 0 -1px 0 rgba(0, 0, 0, 0.3);
+          font-family: 'Georgia', 'Times New Roman', serif;
+          border: 2px solid transparent;
+          background-clip: padding-box;
+          box-shadow:
+            0 0 0 1.5px rgba(212, 175, 55, 0.6),
+            inset 0 2px 4px rgba(0, 0, 0, 0.4),
+            inset 0 -1px 2px rgba(255, 235, 150, 0.3),
+            0 2px 8px rgba(0, 0, 0, 0.3);
           flex-shrink: 0;
+          position: relative;
+        }
+        .user-avatar::after {
+          content: '';
+          position: absolute;
+          inset: 2px;
+          border-radius: 50%;
+          border: 1px solid rgba(255, 235, 150, 0.15);
+          pointer-events: none;
         }
         .user-chevron {
           color: rgba(200, 200, 210, 0.6);
@@ -324,17 +385,21 @@ export default function Navigation() {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 40px;
-          height: 40px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
+          width: 36px;
+          height: 36px;
+          background: transparent;
+          border: 1px solid rgba(255,255,255,0.08);
           border-radius: 8px;
-          color: rgba(220, 220, 230, 0.9);
+          color: rgba(220, 220, 230, 0.85);
           cursor: pointer;
           transition: all 0.2s;
+          position: absolute;
+          left: 16px;
+          top: 50%;
+          transform: translateY(-50%);
         }
         .mobile-toggle:hover {
-          background: rgba(255,255,255,0.09);
+          background: rgba(255,255,255,0.07);
           color: #ffffff;
         }
         @media (min-width: 1024px) {
@@ -361,11 +426,11 @@ export default function Navigation() {
           width: 100%;
           text-align: left;
           padding: 10px 14px;
-          font-size: 12px;
-          font-weight: 600;
-          letter-spacing: 0.07em;
+          font-size: 11px;
+          font-weight: 500;
+          letter-spacing: 0.06em;
           text-transform: uppercase;
-          color: rgba(200, 200, 215, 0.85);
+          color: rgba(200, 200, 215, 0.7);
           text-decoration: none;
           border-radius: 8px;
           transition: all 0.15s;
@@ -376,6 +441,12 @@ export default function Navigation() {
         .mobile-link:hover, .mobile-btn:hover {
           color: #ffffff;
           background: rgba(255,255,255,0.07);
+        }
+        .mobile-link.active, .mobile-btn.active {
+          color: #ffffff;
+          font-weight: 600;
+          background: rgba(212, 175, 55, 0.08);
+          border-left: 2px solid #D4AF37;
         }
         .mobile-divider {
           height: 1px;
@@ -389,18 +460,35 @@ export default function Navigation() {
           padding: 10px 14px;
         }
         .mobile-avatar {
-          width: 36px;
-          height: 36px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #D4AF37, #B8962E);
+          background: radial-gradient(ellipse at 30% 20%, #c9a84c 0%, #a8872a 40%, #7a6320 80%, #5c4a18 100%);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 14px;
-          font-weight: 700;
-          color: #0a0a12;
-          border: 1.5px solid rgba(212,175,55,0.6);
+          font-size: 16px;
+          font-weight: 800;
+          color: #1a1408;
+          text-shadow: 0 1px 0 rgba(212, 175, 55, 0.5), 0 -1px 0 rgba(0, 0, 0, 0.3);
+          font-family: 'Georgia', 'Times New Roman', serif;
+          border: 2px solid transparent;
+          background-clip: padding-box;
+          box-shadow:
+            0 0 0 1.5px rgba(212, 175, 55, 0.6),
+            inset 0 2px 4px rgba(0, 0, 0, 0.4),
+            inset 0 -1px 2px rgba(255, 235, 150, 0.3),
+            0 2px 8px rgba(0, 0, 0, 0.3);
           flex-shrink: 0;
+          position: relative;
+        }
+        .mobile-avatar::after {
+          content: '';
+          position: absolute;
+          inset: 2px;
+          border-radius: 50%;
+          border: 1px solid rgba(255, 235, 150, 0.15);
+          pointer-events: none;
         }
         .mobile-user-name {
           font-size: 14px;
@@ -471,17 +559,26 @@ export default function Navigation() {
       <nav className={`nav-root ${scrolled ? 'scrolled' : 'top'}`}>
         <div className="nav-inner">
           <Link href={isAdmin ? '/admin' : isVendor ? '/vendor' : '/'} className="nav-logo">
-            <Image src="/Logo.png" alt="Nefsyimar" width={40} height={40} className="nav-logo-img" />
+            <Image src="/Logo.png" alt="Nefsyimar" width={48} height={48} className="nav-logo-img" />
+            <span className="nav-brand-name">Nefsyimar</span>
           </Link>
 
           <div className="nav-links">
             {navItems.map((item) => (
               item.isAction ? (
-                <button key={item.name} onClick={handleRepatriationClick} className="nav-link-btn">
+                <button
+                  key={item.name}
+                  onClick={handleRepatriationClick}
+                  className={`nav-link-btn${isActive(item.href) ? ' active' : ''}`}
+                >
                   {item.name}
                 </button>
               ) : (
-                <Link key={item.name} href={item.href} className="nav-link">
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`nav-link${isActive(item.href) ? ' active' : ''}`}
+                >
                   {item.name}
                 </Link>
               )
@@ -544,11 +641,20 @@ export default function Navigation() {
         <div className={`mobile-panel${isOpen ? ' open' : ''}`}>
           {navItems.map((item) => (
             item.isAction ? (
-              <button key={item.name} onClick={handleRepatriationClick} className="mobile-btn">
+              <button
+                key={item.name}
+                onClick={handleRepatriationClick}
+                className={`mobile-btn${isActive(item.href) ? ' active' : ''}`}
+              >
                 {item.name}
               </button>
             ) : (
-              <Link key={item.name} href={item.href} className="mobile-link" onClick={() => setIsOpen(false)}>
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`mobile-link${isActive(item.href) ? ' active' : ''}`}
+                onClick={() => setIsOpen(false)}
+              >
                 {item.name}
               </Link>
             )
