@@ -1,8 +1,6 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle, Upload, AlertCircle, Plane, ShieldCheck, Truck, PhoneCall, Mail, ChevronRight, ChevronLeft } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -41,6 +39,14 @@ function WhatsAppIcon({ size = 15, color = '#D4AF37' }: { size?: number; color?:
 }
 
 export default function RepatriationPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center px-5" style={{ background: '#07080d', color: 'white' }}>Loading...</div>}>
+      <RepatriationPageContent />
+    </Suspense>
+  )
+}
+
+function RepatriationPageContent() {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)

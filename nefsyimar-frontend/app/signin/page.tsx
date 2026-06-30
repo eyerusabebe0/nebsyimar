@@ -1,8 +1,6 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, Heart, ArrowLeft } from 'lucide-react'
@@ -11,6 +9,14 @@ import TestCredentials from '@/components/TestCredentials'
 import { authApi } from '@/lib/api'
 
 export default function SignInPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-primary-900 via-primary-950 to-primary-900 flex items-center justify-center p-4 text-white">Loading...</div>}>
+      <SignInPageContent />
+    </Suspense>
+  )
+}
+
+function SignInPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { login } = useAuth()
