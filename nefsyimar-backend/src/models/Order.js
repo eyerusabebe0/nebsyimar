@@ -200,33 +200,17 @@ const Order = sequelize.define('Order', {
 }, {
   tableName: 'orders',
   indexes: [
-    {
-      unique: true,
-      fields: ['order_number']
-    },
-    {
-      fields: ['buyer_id']
-    },
-    {
-      fields: ['vendor_id']
-    },
-    {
-      fields: ['memorial_id']
-    },
-    {
-      fields: ['status']
-    },
-    {
-      fields: ['created_at']
-    },
-    {
-      fields: ['delivery_date']
-    }
+    { unique: true, fields: ['order_number'] },
+    { fields: ['buyer_id'] },
+    { fields: ['vendor_id'] },
+    { fields: ['memorial_id'] },
+    { fields: ['status'] },
+    { fields: ['createdAt'] }, // FIXED: real column is camelCase, not 'created_at'
+    { fields: ['delivery_date'] }
   ]
 });
 
 // Hooks
-// Generate order number before validation so notNull constraint passes
 Order.beforeValidate(async (order, options) => {
   if (!order.order_number) {
     const date = new Date();
@@ -238,7 +222,6 @@ Order.beforeValidate(async (order, options) => {
   }
 });
 
-// Initialize status history on create
 Order.beforeCreate(async (order, options) => {
   order.status_history = [{
     status: order.status,
@@ -251,8 +234,7 @@ Order.beforeCreate(async (order, options) => {
 Order.prototype.updateStatus = async function(newStatus, note = '', updatedBy = null) {
   const oldStatus = this.status;
   this.status = newStatus;
-  
-  // Add to status history
+
   const statusUpdate = {
     status: newStatus,
     timestamp: new Date(),
@@ -260,10 +242,9 @@ Order.prototype.updateStatus = async function(newStatus, note = '', updatedBy = 
     updated_by: updatedBy,
     previous_status: oldStatus
   };
-  
+
   this.status_history = [...(this.status_history || []), statusUpdate];
-  
-  // Set specific timestamps based on status
+
   if (newStatus === 'DELIVERED') {
     this.actual_delivery = new Date();
   } else if (newStatus === 'CANCELLED') {
@@ -272,7 +253,7 @@ Order.prototype.updateStatus = async function(newStatus, note = '', updatedBy = 
   } else if (newStatus === 'REFUNDED') {
     this.refunded_at = new Date();
   }
-  
+
   await this.save();
   return this;
 };
@@ -319,7 +300,7 @@ Order.prototype.setTrackingNumber = async function(trackingNumber) {
 // Static methods
 Order.getUserOrders = async function(userId, status = null, limit = 20, offset = 0) {
   const where = { buyer_id: userId };
-  
+
   if (status) {
     where.status = status;
   }
@@ -344,7 +325,7 @@ Order.getUserOrders = async function(userId, status = null, limit = 20, offset =
         ]
       }
     ],
-    order: [['created_at', 'DESC']],
+    order: [['createdAt', 'DESC']], // FIXED
     limit,
     offset
   });
@@ -352,7 +333,7 @@ Order.getUserOrders = async function(userId, status = null, limit = 20, offset =
 
 Order.getVendorOrders = async function(vendorId, status = null, limit = 20, offset = 0) {
   const where = { vendor_id: vendorId };
-  
+
   if (status) {
     where.status = status;
   }
@@ -377,7 +358,7 @@ Order.getVendorOrders = async function(vendorId, status = null, limit = 20, offs
         ]
       }
     ],
-    order: [['created_at', 'DESC']],
+    order: [['createdAt', 'DESC']], // FIXED
     limit,
     offset
   });
@@ -385,7 +366,7 @@ Order.getVendorOrders = async function(vendorId, status = null, limit = 20, offs
 
 Order.getOrdersByDateRange = async function(startDate, endDate, vendorId = null) {
   const where = {
-    created_at: {
+    createdAt: { // FIXED
       [sequelize.Sequelize.Op.between]: [startDate, endDate]
     }
   };
@@ -403,19 +384,19 @@ Order.getOrdersByDateRange = async function(startDate, endDate, vendorId = null)
         attributes: ['vendor_id', 'business_name']
       }
     ],
-    order: [['created_at', 'DESC']]
+    order: [['createdAt', 'DESC']] // FIXED
   });
 };
 
 Order.getOrderStats = async function(vendorId = null, dateRange = null) {
   const where = {};
-  
+
   if (vendorId) {
     where.vendor_id = vendorId;
   }
-  
+
   if (dateRange) {
-    where.created_at = {
+    where.createdAt = { // FIXED
       [sequelize.Sequelize.Op.between]: [dateRange.start, dateRange.end]
     };
   }

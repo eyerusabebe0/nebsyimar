@@ -10,10 +10,7 @@ const AdminActionLog = sequelize.define('AdminActionLog', {
   admin_id: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'users',
-      key: 'user_id',
-    },
+    references: { model: 'users', key: 'user_id' },
   },
   action: {
     type: DataTypes.ENUM(
@@ -69,7 +66,7 @@ const AdminActionLog = sequelize.define('AdminActionLog', {
     { fields: ['admin_id'] },
     { fields: ['action'] },
     { fields: ['target_type'] },
-    { fields: ['created_at'] },
+    { fields: ['createdAt'] }, // FIXED: real column is camelCase, not 'created_at'
   ],
 });
 

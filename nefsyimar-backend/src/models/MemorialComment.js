@@ -10,25 +10,17 @@ const MemorialComment = sequelize.define('MemorialComment', {
   memorial_id: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'memorials',
-      key: 'memorial_id',
-    },
+    references: { model: 'memorials', key: 'memorial_id' },
   },
   user_id: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'users',
-      key: 'user_id',
-    },
+    references: { model: 'users', key: 'user_id' },
   },
   message: {
     type: DataTypes.TEXT,
     allowNull: false,
-    validate: {
-      len: [1, 1000],
-    },
+    validate: { len: [1, 1000] },
   },
   likes_count: {
     type: DataTypes.INTEGER,
@@ -51,10 +43,7 @@ const MemorialComment = sequelize.define('MemorialComment', {
   deleted_by: {
     type: DataTypes.UUID,
     allowNull: true,
-    references: {
-      model: 'users',
-      key: 'user_id',
-    },
+    references: { model: 'users', key: 'user_id' },
   },
   metadata: {
     type: DataTypes.JSONB,
@@ -64,21 +53,11 @@ const MemorialComment = sequelize.define('MemorialComment', {
 }, {
   tableName: 'memorial_comments',
   indexes: [
-    {
-      fields: ['memorial_id'],
-    },
-    {
-      fields: ['user_id'],
-    },
-    {
-      fields: ['visibility'],
-    },
-    {
-      fields: ['is_deleted'],
-    },
-    {
-      fields: ['created_at'],
-    },
+    { fields: ['memorial_id'] },
+    { fields: ['user_id'] },
+    { fields: ['visibility'] },
+    { fields: ['is_deleted'] },
+    { fields: ['createdAt'] }, // FIXED: real column is camelCase, not 'created_at'
   ],
 });
 

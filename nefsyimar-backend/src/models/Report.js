@@ -10,34 +10,22 @@ const Report = sequelize.define('Report', {
   reporter_id: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'users',
-      key: 'user_id',
-    },
+    references: { model: 'users', key: 'user_id' },
   },
   reported_user_id: {
     type: DataTypes.UUID,
     allowNull: true,
-    references: {
-      model: 'users',
-      key: 'user_id',
-    },
+    references: { model: 'users', key: 'user_id' },
   },
   memorial_id: {
     type: DataTypes.UUID,
     allowNull: true,
-    references: {
-      model: 'memorials',
-      key: 'memorial_id',
-    },
+    references: { model: 'memorials', key: 'memorial_id' },
   },
   comment_id: {
     type: DataTypes.UUID,
     allowNull: true,
-    references: {
-      model: 'memorial_comments',
-      key: 'comment_id',
-    },
+    references: { model: 'memorial_comments', key: 'comment_id' },
   },
   target_type: {
     type: DataTypes.ENUM('MEMORIAL', 'COMMENT', 'USER', 'GIFT', 'OTHER'),
@@ -73,10 +61,7 @@ const Report = sequelize.define('Report', {
   resolved_by: {
     type: DataTypes.UUID,
     allowNull: true,
-    references: {
-      model: 'users',
-      key: 'user_id',
-    },
+    references: { model: 'users', key: 'user_id' },
   },
   resolved_at: {
     type: DataTypes.DATE,
@@ -99,7 +84,7 @@ const Report = sequelize.define('Report', {
     { fields: ['target_type'] },
     { fields: ['memorial_id'] },
     { fields: ['comment_id'] },
-    { fields: ['created_at'] },
+    { fields: ['createdAt'] }, // FIXED: real column is camelCase, not 'created_at'
   ],
 });
 

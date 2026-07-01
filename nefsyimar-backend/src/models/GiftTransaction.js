@@ -10,50 +10,32 @@ const GiftTransaction = sequelize.define('GiftTransaction', {
   sender_id: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'users',
-      key: 'user_id'
-    }
+    references: { model: 'users', key: 'user_id' }
   },
   recipient_id: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'users',
-      key: 'user_id'
-    }
+    references: { model: 'users', key: 'user_id' }
   },
   memorial_id: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'memorials',
-      key: 'memorial_id'
-    }
+    references: { model: 'memorials', key: 'memorial_id' }
   },
   gift_id: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'gift_catalog',
-      key: 'gift_id'
-    }
+    references: { model: 'gift_catalog', key: 'gift_id' }
   },
   wallet_txn_id: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'wallet_transactions',
-      key: 'txn_id'
-    }
+    references: { model: 'wallet_transactions', key: 'txn_id' }
   },
   amount: {
     type: DataTypes.DECIMAL(8, 2),
     allowNull: false,
-    validate: {
-      min: 0.01,
-      isDecimal: true
-    }
+    validate: { min: 0.01, isDecimal: true }
   },
   platform_fee: {
     type: DataTypes.DECIMAL(8, 2),
@@ -73,16 +55,12 @@ const GiftTransaction = sequelize.define('GiftTransaction', {
   message: {
     type: DataTypes.TEXT,
     allowNull: true,
-    validate: {
-      len: [0, 500]
-    }
+    validate: { len: [0, 500] }
   },
   message_amharic: {
     type: DataTypes.TEXT,
     allowNull: true,
-    validate: {
-      len: [0, 500]
-    }
+    validate: { len: [0, 500] }
   },
   sender_name: {
     type: DataTypes.STRING(100),
@@ -137,33 +115,15 @@ const GiftTransaction = sequelize.define('GiftTransaction', {
 }, {
   tableName: 'gift_transactions',
   indexes: [
-    {
-      fields: ['sender_id']
-    },
-    {
-      fields: ['recipient_id']
-    },
-    {
-      fields: ['memorial_id']
-    },
-    {
-      fields: ['gift_id']
-    },
-    {
-      fields: ['wallet_txn_id']
-    },
-    {
-      fields: ['status']
-    },
-    {
-      fields: ['visibility']
-    },
-    {
-      fields: ['is_featured_on_memorial']
-    },
-    {
-      fields: ['created_at']
-    }
+    { fields: ['sender_id'] },
+    { fields: ['recipient_id'] },
+    { fields: ['memorial_id'] },
+    { fields: ['gift_id'] },
+    { fields: ['wallet_txn_id'] },
+    { fields: ['status'] },
+    { fields: ['visibility'] },
+    { fields: ['is_featured_on_memorial'] },
+    { fields: ['createdAt'] } // FIXED: real column is camelCase, not 'created_at'
   ]
 });
 
@@ -178,10 +138,7 @@ GiftTransaction.prototype.markCompleted = async function() {
 GiftTransaction.prototype.markFailed = async function(reason) {
   this.status = 'FAILED';
   this.processed_at = new Date();
-  this.metadata = { 
-    ...this.metadata, 
-    failure_reason: reason 
-  };
+  this.metadata = { ...this.metadata, failure_reason: reason };
   await this.save();
   return this;
 };
@@ -203,30 +160,16 @@ GiftTransaction.prototype.playAnimation = async function() {
 
 // Static methods
 GiftTransaction.getMemorialGifts = async function(memorialId, limit = 50, offset = 0, visibility = 'PUBLIC') {
-  const where = {
-    memorial_id: memorialId,
-    status: 'COMPLETED'
-  };
-
-  if (visibility) {
-    where.visibility = visibility;
-  }
+  const where = { memorial_id: memorialId, status: 'COMPLETED' };
+  if (visibility) where.visibility = visibility;
 
   return this.findAll({
     where,
     include: [
-      {
-        model: sequelize.models.User,
-        as: 'sender',
-        attributes: ['user_id', 'name']
-      },
-      {
-        model: sequelize.models.GiftCatalog,
-        as: 'gift',
-        attributes: ['gift_id', 'name', 'animation_type', 'icon_url']
-      }
+      { model: sequelize.models.User, as: 'sender', attributes: ['user_id', 'name'] },
+      { model: sequelize.models.GiftCatalog, as: 'gift', attributes: ['gift_id', 'name', 'animation_type', 'icon_url'] }
     ],
-    order: [['created_at', 'DESC']],
+    order: [['createdAt', 'DESC']], // FIXED
     limit,
     offset
   });
@@ -234,23 +177,12 @@ GiftTransaction.getMemorialGifts = async function(memorialId, limit = 50, offset
 
 GiftTransaction.getUserSentGifts = async function(userId, limit = 50, offset = 0) {
   return this.findAll({
-    where: {
-      sender_id: userId,
-      status: 'COMPLETED'
-    },
+    where: { sender_id: userId, status: 'COMPLETED' },
     include: [
-      {
-        model: sequelize.models.Memorial,
-        as: 'memorial',
-        attributes: ['memorial_id', 'deceased_name', 'memorial_url']
-      },
-      {
-        model: sequelize.models.GiftCatalog,
-        as: 'gift',
-        attributes: ['gift_id', 'name', 'icon_url']
-      }
+      { model: sequelize.models.Memorial, as: 'memorial', attributes: ['memorial_id', 'deceased_name', 'memorial_url'] },
+      { model: sequelize.models.GiftCatalog, as: 'gift', attributes: ['gift_id', 'name', 'icon_url'] }
     ],
-    order: [['created_at', 'DESC']],
+    order: [['createdAt', 'DESC']], // FIXED
     limit,
     offset
   });
@@ -258,28 +190,13 @@ GiftTransaction.getUserSentGifts = async function(userId, limit = 50, offset = 0
 
 GiftTransaction.getUserReceivedGifts = async function(userId, limit = 50, offset = 0) {
   return this.findAll({
-    where: {
-      recipient_id: userId,
-      status: 'COMPLETED'
-    },
+    where: { recipient_id: userId, status: 'COMPLETED' },
     include: [
-      {
-        model: sequelize.models.User,
-        as: 'sender',
-        attributes: ['user_id', 'name']
-      },
-      {
-        model: sequelize.models.Memorial,
-        as: 'memorial',
-        attributes: ['memorial_id', 'deceased_name', 'memorial_url']
-      },
-      {
-        model: sequelize.models.GiftCatalog,
-        as: 'gift',
-        attributes: ['gift_id', 'name', 'icon_url']
-      }
+      { model: sequelize.models.User, as: 'sender', attributes: ['user_id', 'name'] },
+      { model: sequelize.models.Memorial, as: 'memorial', attributes: ['memorial_id', 'deceased_name', 'memorial_url'] },
+      { model: sequelize.models.GiftCatalog, as: 'gift', attributes: ['gift_id', 'name', 'icon_url'] }
     ],
-    order: [['created_at', 'DESC']],
+    order: [['createdAt', 'DESC']], // FIXED
     limit,
     offset
   });
@@ -287,10 +204,7 @@ GiftTransaction.getUserReceivedGifts = async function(userId, limit = 50, offset
 
 GiftTransaction.getMemorialStats = async function(memorialId) {
   const result = await this.findOne({
-    where: {
-      memorial_id: memorialId,
-      status: 'COMPLETED'
-    },
+    where: { memorial_id: memorialId, status: 'COMPLETED' },
     attributes: [
       [sequelize.fn('COUNT', sequelize.col('txn_id')), 'total_gifts'],
       [sequelize.fn('SUM', sequelize.col('amount')), 'total_value'],

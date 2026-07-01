@@ -203,39 +203,17 @@ const Memorial = sequelize.define('Memorial', {
 }, {
   tableName: 'memorials',
   indexes: [
-    {
-      fields: ['user_id']
-    },
-    {
-      fields: ['visibility']
-    },
-    {
-      fields: ['paid_status']
-    },
-    {
-      fields: ['is_active']
-    },
-    {
-      fields: ['is_featured']
-    },
-    {
-      fields: ['review_status']
-    },
-    {
-      fields: ['sensitivity_level']
-    },
-    {
-      fields: ['view_count']
-    },
-    {
-      fields: ['gift_count']
-    },
-    {
-      fields: ['total_gifts_value']
-    },
-    {
-      fields: ['last_activity_at']
-    },
+    { fields: ['user_id'] },
+    { fields: ['visibility'] },
+    { fields: ['paid_status'] },
+    { fields: ['is_active'] },
+    { fields: ['is_featured'] },
+    { fields: ['review_status'] },
+    { fields: ['sensitivity_level'] },
+    { fields: ['view_count'] },
+    { fields: ['gift_count'] },
+    { fields: ['total_gifts_value'] },
+    { fields: ['last_activity_at'] },
     {
       unique: true,
       fields: ['memorial_url'],
@@ -245,34 +223,28 @@ const Memorial = sequelize.define('Memorial', {
         }
       }
     },
-    {
-      fields: ['created_at']
-    },
-    {
-      fields: ['deceased_name']
-    }
+    { fields: ['createdAt'] }, // FIXED: real column is camelCase, not 'created_at'
+    { fields: ['deceased_name'] }
   ]
 });
 
 // Hooks
 Memorial.beforeCreate(async (memorial, options) => {
-  // Generate unique memorial URL if not provided
   if (!memorial.memorial_url) {
     const baseUrl = memorial.deceased_name
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
-    
+
     let url = baseUrl;
     let counter = 1;
-    
-    // Ensure uniqueness
+
     while (await Memorial.findOne({ where: { memorial_url: url } })) {
       url = `${baseUrl}-${counter}`;
       counter++;
     }
-    
+
     memorial.memorial_url = url;
   }
 });
@@ -353,7 +325,7 @@ Memorial.getPublicMemorials = async function(limit = 20, offset = 0, filters = {
     where,
     order: [
       ['is_featured', 'DESC'],
-      ['created_at', 'DESC']
+      ['createdAt', 'DESC'] // FIXED
     ],
     limit,
     offset,
@@ -392,7 +364,7 @@ Memorial.getFeaturedMemorials = async function(limit = 10) {
         [sequelize.Sequelize.Op.gt]: new Date()
       }
     },
-    order: [['created_at', 'DESC']],
+    order: [['createdAt', 'DESC']], // FIXED
     limit
   });
 };

@@ -360,7 +360,7 @@ Product.getActiveProducts = async function(filters = {}, limit = 20, offset = 0)
   } else if (filters.sort_by === 'popular') {
     orderBy.push(['total_sold', 'DESC']);
   } else {
-    orderBy.push(['is_featured', 'DESC'], ['created_at', 'DESC']);
+    orderBy.push(['is_featured', 'DESC'], ['createdAt', 'DESC']);
   }
 
   return this.findAll({

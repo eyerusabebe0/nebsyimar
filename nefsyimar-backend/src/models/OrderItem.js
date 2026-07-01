@@ -200,7 +200,7 @@ OrderItem.getOrderItems = async function(orderId) {
         attributes: ['product_id', 'name', 'main_image', 'is_active']
       }
     ],
-    order: [['created_at', 'ASC']]
+    order: [['createdAt', 'ASC']]
   });
 };
 
@@ -211,7 +211,7 @@ OrderItem.getProductOrderHistory = async function(productId, limit = 50) {
       {
         model: sequelize.models.Order,
         as: 'order',
-        attributes: ['order_id', 'order_number', 'status', 'created_at'],
+        attributes: ['order_id', 'order_number', 'status', 'createdAt'],
         include: [
           {
             model: sequelize.models.User,
@@ -221,7 +221,7 @@ OrderItem.getProductOrderHistory = async function(productId, limit = 50) {
         ]
       }
     ],
-    order: [['created_at', 'DESC']],
+    order: [['createdAt', 'DESC']],
     limit
   });
 };
@@ -256,7 +256,7 @@ OrderItem.getItemsByStatus = async function(status, vendorId = null) {
   return this.findAll({
     where,
     include,
-    order: [['created_at', 'ASC']]
+    order: [['createdAt', 'ASC']]
   });
 };
 
@@ -266,7 +266,7 @@ OrderItem.getPopularProducts = async function(vendorId = null, limit = 10, dateR
   };
   
   if (dateRange) {
-    where.created_at = {
+    where.createdAt = {
       [sequelize.Sequelize.Op.between]: [dateRange.start, dateRange.end]
     };
   }
