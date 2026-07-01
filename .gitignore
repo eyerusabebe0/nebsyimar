@@ -1,9 +1,22 @@
+<<<<<<< HEAD
 # Dependencies
 node_modules/
+=======
+node_modules/
+nefsyimar-frontend/node_modules/
+nefsyimar-backend/node_modules/
+nefsyimar-frontend/.next/
+# Environment variables
+.env
+.env*.local
+
+# Logs
+>>>>>>> 18031e13a735c23d174a5b037914f65a6fb5673d
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+<<<<<<< HEAD
 # Runtime data
 pids
 *.pid
@@ -146,3 +159,9 @@ Thumbs.db
 # Temporary files
 tmp/
 temp/
+=======
+# Other common ignores
+.DS_Store
+dist/
+build/
+>>>>>>> 18031e13a735c23d174a5b037914f65a6fb5673d

@@ -1,0 +1,246 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700;900&family=IM+Fell+English+SC&display=swap');
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  color: #f3eedd;
+  background: #0a0a12;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-engraved {
+  font-family: 'Cinzel Decorative', 'Cinzel', 'IM Fell English SC', 'Trajan Pro', Georgia, serif;
+  letter-spacing: 0.06em;
+}
+
+.glass-effect {
+  background: rgba(15, 15, 26, 0.7);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(212, 168, 83, 0.2);
+}
+
+.memorial-card {
+  background: linear-gradient(145deg, rgba(26, 26, 46, 0.85), rgba(15, 15, 26, 0.92));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 168, 83, 0.18);
+  border-radius: 1rem;
+  box-shadow:
+    0 8px 24px -8px rgba(0, 0, 0, 0.55),
+    0 2px 6px -1px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.memorial-card-dark {
+  background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+.gift-animation {
+  animation: giftFloat 3s ease-in-out infinite;
+}
+
+@keyframes giftFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Gold accent underline */
+.gold-underline {
+  position: relative;
+  display: inline-block;
+}
+.gold-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #d4a853, #c9963e);
+  border-radius: 2px;
+}
+
+/* Feature card hover */
+.feature-card {
+  background: linear-gradient(145deg, rgba(26, 26, 46, 0.7), rgba(15, 15, 26, 0.85));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 168, 83, 0.18);
+  border-radius: 1.5rem;
+  transition: all 0.3s ease;
+  color: #f3eedd;
+}
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 36px -8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(212, 168, 83, 0.35);
+  border-color: rgba(212, 168, 83, 0.5);
+}
+
+/* Memorial Tiles Animations */
+.memorial-tile {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes scrollUpLeft {
+  0% { 
+    transform: perspective(1000px) rotateY(15deg) translateY(0);
+  }
+  100% { 
+    transform: perspective(1000px) rotateY(15deg) translateY(-200vh);
+  }
+}
+
+@keyframes scrollUpRight {
+  0% { 
+    transform: perspective(1000px) rotateY(-15deg) translateY(0);
+  }
+  100% { 
+    transform: perspective(1000px) rotateY(-15deg) translateY(-200vh);
+  }
+}
+
+.animate-scroll-up-left {
+  animation: scrollUpLeft 30s linear infinite;
+}
+
+.animate-scroll-up-right {
+  animation: scrollUpRight 35s linear infinite;
+}
+
+/* Memorial tile hover effects */
+.memorial-tile:hover {
+  transform: scale(1.05) translateY(-8px);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(212, 168, 83, 0.2);
+}
+
+/* Respectful glow animation */
+@keyframes respectfulGlow {
+  0%, 100% { 
+    box-shadow: 
+      0 0 20px rgba(212, 168, 83, 0.2),
+      0 0 40px rgba(212, 168, 83, 0.1);
+  }
+  50% { 
+    box-shadow: 
+      0 0 30px rgba(212, 168, 83, 0.4),
+      0 0 60px rgba(212, 168, 83, 0.2);
+  }
+}
+
+.shadow-glow {
+  animation: respectfulGlow 3s ease-in-out infinite;
+}
+
+/* 3D perspective effects */
+.memorial-tile {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Gradient radial utility */
+.bg-gradient-radial {
+  background: radial-gradient(var(--tw-gradient-stops));
+}
+
+/* Text glow for gold */
+.text-glow {
+  text-shadow: 0 0 20px rgba(212, 168, 83, 0.3);
+}
+
+/* Shared animated dark background used across pages */
+.animated-dark-bg {
+  position: relative;
+  background: radial-gradient(ellipse at top, #131b2e 0%, #0a0a12 60%, #06060a 100%);
+  isolation: isolate;
+}
+.animated-dark-bg::before,
+.animated-dark-bg::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  z-index: 0;
+  pointer-events: none;
+}
+.animated-dark-bg::before {
+  width: 32rem;
+  height: 32rem;
+  top: -10rem;
+  left: -10rem;
+  background: rgba(212, 168, 83, 0.18);
+  animation: bgBlob 20s ease-in-out infinite;
+}
+.animated-dark-bg::after {
+  width: 36rem;
+  height: 36rem;
+  bottom: -12rem;
+  right: -10rem;
+  background: rgba(232, 192, 90, 0.15);
+  animation: bgBlob 24s ease-in-out infinite reverse;
+  animation-delay: 3s;
+}
+.animated-dark-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes bgBlob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.05); }
+  66% { transform: translate(-30px, 30px) scale(0.95); }
+}
+
+/* Floating dust particle */
+.dust-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(212, 168, 83, 0.65);
+  box-shadow: 0 0 8px rgba(212, 168, 83, 0.55);
+  animation: dustFloat linear infinite;
+}
+@keyframes dustFloat {
+  0% { transform: translateY(20vh) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-110vh) translateX(20px); opacity: 0; }
+}
