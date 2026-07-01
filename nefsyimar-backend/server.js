@@ -11,14 +11,13 @@ const initApp = async () => {
     await sequelize.authenticate();
     console.log('✅ Database connection established successfully.');
 
-    // ⚡ FORCED SYNC: Removed the production environment guard so tables auto-create now
-    console.log('⏳ Synchronizing database tables...');
+    // If you are stuck in a loop of "column not exist" errors, 
+    // the database needs to be cleared manually as the code cannot "fix" a missing base column
     await sequelize.sync({ alter: true });
+    
     console.log('✅ Database models synchronized successfully.');
-
-    console.log(`🚀 Nefsyimar Backend app initialized (env=${process.env.NODE_ENV}).`);
   } catch (error) {
-    console.error('❌ Unable to start server:', error);
+    console.error('❌ CRITICAL: Database sync failed. If this persists, manually drop the DB schema.', error);
     process.exit(1);
   }
 };
