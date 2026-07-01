@@ -7,6 +7,18 @@ const WalletTransaction = sequelize.define('WalletTransaction', {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
+  createdAt: {
+    type: DataTypes.DATE,
+    field: 'created_at', // This maps Sequelize's field to the DB column 'created_at'
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    field: 'updated_at',
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
   wallet_id: {
     type: DataTypes.UUID,
     allowNull: false,
@@ -112,28 +124,14 @@ const WalletTransaction = sequelize.define('WalletTransaction', {
   }
 }, {
   tableName: 'wallet_transactions',
-  indexes: [
-    {
-      fields: ['wallet_id']
-    },
-    {
-      fields: ['user_id']
-    },
-    {
-      fields: ['type']
-    },
-    {
-      fields: ['status']
-    },
-    {
-      fields: ['reference_id', 'reference_type']
-    },
-    {
-      fields: ['external_txn_id']
-    },
-    {
-      fields: ['created_at']
-    }
+indexes: [
+    { fields: ['wallet_id'] },
+    { fields: ['user_id'] },
+    { fields: ['type'] },
+    { fields: ['status'] },
+    { fields: ['reference_id', 'reference_type'] },
+    { fields: ['external_txn_id'] },
+    { fields: ['createdAt'] } // ONLY use the field name here
   ]
 });
 
@@ -172,7 +170,7 @@ WalletTransaction.prototype.markRefunded = async function(refundReason) {
 WalletTransaction.getTransactionHistory = async function(walletId, limit = 50, offset = 0) {
   return this.findAll({
     where: { wallet_id: walletId },
-    order: [['created_at', 'DESC']],
+    order: [['createdAt', 'DESC']], // Use the model field name here!
     limit,
     offset
   });
