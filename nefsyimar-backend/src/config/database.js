@@ -1,32 +1,33 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// Database configuration
-const config = {
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'nefsyimar_db',
-  username: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || '',
-  dialect: 'postgres',
-  logging: process.env.NODE_ENV === 'development' ? console.log : false,
-  pool: {
-    max: 10,
-    min: 0,
-    acquire: 30000,
-    idle: 10000
-  },
-  define: {
-    timestamps: true,
-    underscored: true,
-    freezeTableName: true
-  }
-};
+// If DATABASE_URL is provided, use it directly (this is what Render does)
+let sequelize;
+if (process.env.DATABASE_URL) {
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false 
+      }
+    },
+    logging: false
+  });
+} else {
+  // Fallback to individual variables for your local development
+  const config = {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    database: process.env.DB_NAME || 'nefsyimar_db',
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || '',
+    dialect: 'postgres',
+    logging: false
+  };
+  sequelize = new Sequelize(config.database, config.username, config.password, config);
+}
 
-// Create Sequelize instance
-const sequelize = new Sequelize(config.database, config.username, config.password, config);
-
-// Test connection function
 const testConnection = async () => {
   try {
     await sequelize.authenticate();
@@ -40,6 +41,5 @@ const testConnection = async () => {
 
 module.exports = {
   sequelize,
-  testConnection,
-  config
+  testConnection
 };
