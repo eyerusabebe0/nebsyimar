@@ -18,6 +18,14 @@ const ALLOWED_HEADSTONE_DESIGNS: HeadstoneDesignId[] = [
   'stone_1', 'stone_2', 'stone_3', 'stone_4', 'stone_6', 'stone_8', 'stone_9', 'stone_10'
 ]
 
+function getYearOnlyDates(dates?: string): string {
+  if (!dates) return ''
+  // pulls every 4-digit year out of the string and rejoins with the same separator style
+  const years = dates.match(/\d{4}/g)
+  if (!years || years.length === 0) return dates
+  return years.length > 1 ? `${years[0]} – ${years[years.length - 1]}` : years[0]
+}
+
 function normalizeHeadstoneDesign(design?: string): HeadstoneDesignId | undefined {
   return ALLOWED_HEADSTONE_DESIGNS.includes(design as HeadstoneDesignId)
     ? (design as HeadstoneDesignId)
@@ -85,18 +93,18 @@ export default function MemorialHeader({ memorial }: MemorialHeaderProps) {
         style={{ backgroundImage: "url('/cemetery_bg.png')" }}
       >
         {/* Safe check for memorial object before rendering */}
-        {memorial && (
-          <HeadstonePreview
-            memorial={{
-              name: memorial.name,
-              dates: memorial.dates,
-              image: memorial.image,
-              headstoneDesign: normalizeHeadstoneDesign(memorial.headstoneDesign),
-            }}
-            width={340}
-            height={420}
-          />
-        )}
+   {memorial && (
+  <HeadstonePreview
+    memorial={{
+      name: memorial.name,
+      dates: getYearOnlyDates(memorial.dates),
+      image: memorial.image,
+      headstoneDesign: normalizeHeadstoneDesign(memorial.headstoneDesign),
+    }}
+    width={340}
+    height={420}
+  />
+)}
         
   {/* CRITICAL: If the headstone container has 'overflow-hidden' or 'transform', 
   this 'div' must be moved OUTSIDE that container. 
@@ -153,12 +161,12 @@ export default function MemorialHeader({ memorial }: MemorialHeaderProps) {
           {memorial.name}
         </h1>
         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-2 sm:space-y-0 text-accent-300">
-          {memorial.dates && (
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-accent-400" />
-              <span className="font-medium">{memorial.dates}</span>
-            </div>
-          )}
+        {memorial.dates && (
+  <div className="flex items-center gap-2">
+    <Calendar className="w-4 h-4 text-accent-400" />
+    <span className="font-medium">{memorial.dates}</span>
+  </div>
+)}
           {memorial.location && (
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-accent-400" />

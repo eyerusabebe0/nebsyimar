@@ -27,10 +27,7 @@ export default function AboutPage() {
           <div className="space-y-8">
             <div className="text-accent-300">
               <p className="text-lg leading-relaxed">
-                Nefsyimar is Ethiopia's first digital memorial platform, designed to honor the deceased, 
-                connect communities, and preserve memories with dignity and compassion. We provide a 
-                sacred digital space where families and friends can come together to celebrate lives 
-                and keep memories alive forever.
+               Nefsyimar is Ethiopia’s pioneer digital memorial platform and the world's first to integrate interactive 3D monuments, offering a dignified global space for honoring loved ones. By combining immersive virtual legacy preservation with a seamless digital gifting ecosystem—including symbolic flowers and candles—it empowers families and communities worldwide to celebrate lives, share grief, and sustain enduring memories with profound respect.
               </p>
             </div>
 
