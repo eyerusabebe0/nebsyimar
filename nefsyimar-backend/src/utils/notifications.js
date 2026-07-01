@@ -327,18 +327,20 @@ const sendEmail = async ({ to, subject, template, data, html, text }) => {
 };
 
 // Send SMS function
+// Send SMS function
 const sendSMS = async ({ to, message }) => {
   try {
     const client = initializeTwilioClient();
     
-    if (!client) {
-      console.warn('SMS service not configured');
+    // ADD THIS: Check if the client AND the phone number exist
+    if (!client || !process.env.TWILIO_PHONE_NUMBER) {
+      console.warn('SMS service not configured (missing client or phone number)');
       return { success: false, error: 'SMS service not configured' };
     }
 
     const result = await client.messages.create({
       body: message,
-      from: process.env.TWILIO_PHONE_NUMBER,
+      from: process.env.TWILIO_PHONE_NUMBER, // This will now only run if the ENV is set
       to
     });
 
