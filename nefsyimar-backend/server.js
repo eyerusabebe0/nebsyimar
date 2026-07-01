@@ -13,7 +13,7 @@ const initApp = async () => {
 
     // If you are stuck in a loop of "column not exist" errors, 
     // the database needs to be cleared manually as the code cannot "fix" a missing base column
-    await sequelize.sync({ alter: true });
+  await sequelize.sync({ force: true });
     
     console.log('✅ Database models synchronized successfully.');
   } catch (error) {
