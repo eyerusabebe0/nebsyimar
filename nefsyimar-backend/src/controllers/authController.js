@@ -626,7 +626,7 @@ const updateProfile = asyncHandler(async (req, res) => {
 // @route   POST /api/v1/auth/google
 // @access  Public
 const googleAuth = asyncHandler(async (req, res) => {
-  // Check if Google Auth is configured at all
+  // Guard clause: check if Google Auth is configured
   if (!googleClient) {
     return res.status(501).json({ 
       success: false, 
@@ -635,7 +635,65 @@ const googleAuth = asyncHandler(async (req, res) => {
   }
 
   const { credential } = req.body;
-  // ... rest of your existing code remains the same ...
+  
+  if (!credential) {
+    return res.status(400).json({
+      success: false,
+      message: 'Google credential is required'
+    });
+  }
+
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    const { Op } = require('sequelize');
+    let user = await User.findOne({ 
+      where: { email: { [Op.iLike]: email } },
+      include: [{ model: Wallet, as: 'wallet' }]
+    });
+
+    if (user) {
+      if (!user.google_id) {
+        user.google_id = googleId;
+        await user.save();
+      }
+    } else {
+      user = await User.create({
+        name,
+        email,
+        google_id: googleId,
+        profile_image: picture,
+        verified: true,
+        email_verified: true,
+        is_active: true,
+        role: 'Public User'
+      });
+
+      const wallet = await Wallet.create({
+        user_id: user.user_id,
+        balance: 0.00,
+        currency: 'ETB',
+        is_frozen: false
+      });
+      user.wallet = wallet;
+    }
+
+    const token = generateToken(user.user_id);
+    res.json({
+      success: true,
+      message: 'Google authentication successful',
+      data: { user, wallet: user.wallet, token }
+    });
+  } catch (error) {
+    console.error('Google OAuth error:', error);
+    res.status(401).json({ success: false, message: 'Invalid Google token' });
+  }
 });
 
 // @desc    Create new admin user (to be called only by Super Admin via admin routes)
@@ -707,7 +765,7 @@ const createAdminUser = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/auth/google/url
 // @access  Public
 const getGoogleAuthUrl = asyncHandler(async (req, res) => {
-  if (!process.env.GOOGLE_CLIENT_ID) {
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_REDIRECT_URI) {
     return res.status(501).json({ 
       success: false, 
       message: 'Google authentication is not configured.' 
