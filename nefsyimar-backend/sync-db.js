@@ -5,8 +5,8 @@ const { sequelize } = require('./models'); // ⚠️ Make sure this points to wh
 async function sync() {
   try {
     console.log('Connecting to PostgreSQL and creating tables...');
-    // alter: true will safely create tables or update existing columns to match your code structures
-    await sequelize.sync({ alter: true }); 
+    // force: true will drop and recreate all tables
+    await sequelize.sync({ force: true }); 
     console.log('SUCCESS: All database tables synced perfectly!');
     process.exit(0);
   } catch (error) {
