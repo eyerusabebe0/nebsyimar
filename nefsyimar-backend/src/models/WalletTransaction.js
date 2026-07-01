@@ -124,14 +124,14 @@ const WalletTransaction = sequelize.define('WalletTransaction', {
   }
 }, {
   tableName: 'wallet_transactions',
-indexes: [
+  indexes: [
     { fields: ['wallet_id'] },
     { fields: ['user_id'] },
     { fields: ['type'] },
     { fields: ['status'] },
     { fields: ['reference_id', 'reference_type'] },
     { fields: ['external_txn_id'] },
-    { fields: ['createdAt'] } // ONLY use the field name here
+    { fields: ['created_at'] } // FIXED: use the real DB column name, not the JS attribute name
   ]
 });
 
@@ -170,7 +170,7 @@ WalletTransaction.prototype.markRefunded = async function(refundReason) {
 WalletTransaction.getTransactionHistory = async function(walletId, limit = 50, offset = 0) {
   return this.findAll({
     where: { wallet_id: walletId },
-    order: [['createdAt', 'DESC']], // Use the model field name here!
+    order: [['createdAt', 'DESC']], // fine here — findAll/order DOES use the JS attribute name
     limit,
     offset
   });
